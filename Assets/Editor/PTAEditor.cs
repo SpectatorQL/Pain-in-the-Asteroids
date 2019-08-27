@@ -113,11 +113,10 @@ namespace PTA
             EditorGUI.DrawRect(viewRect, Color.gray);
 
             int enemyTypeCount = (int)EnemyType.Count;
+            string[] enemyTypeNames = Enum.GetNames(typeof(EnemyType));
             float[] probValues = World.EnemyProbability.Values;
             if(DisplayedView == View.Wave)
-            {
-                string[] enemyTypeNames = Enum.GetNames(typeof(EnemyType));
-                        
+            {    
                 float rowHeight = 32.0f;
                 float rowStepY = 32.0f;
                         
@@ -170,11 +169,12 @@ namespace PTA
             }
             else if(DisplayedView == View.Graph)
             {
-                float waveChunkX = viewRect.x;
-                float waveChunkWidth = 32.0f;
+                Rect yAxisRect = new Rect(viewRect.x, viewRect.y, 32, viewRect.height);
 
+                float waveChunkX = yAxisRect.width;
+                float waveChunkWidth = 32.0f;
                 float graphRectWidth = 0.0f;
-                float graphRectHeight = viewRect.height - 32.0f;
+                float graphRectHeight = viewRect.height;
 
                 int waveCount = PTAMain.MAX_WAVE;
                 Vector2[] waveChunkPositions = new Vector2[waveCount];
@@ -191,12 +191,28 @@ namespace PTA
                     waveChunkX += waveChunkWidth;
                     graphRectWidth += waveChunkWidth;
                 }
-                // TODO(SpectatorQL): Add yAxiseRect.
+                graphRectHeight += yAxisRect.width;
+
                 Rect graphRect = new Rect(viewRect.x, viewRect.y, graphRectWidth, graphRectHeight);
 
 
                 ScrollPosition = GUI.BeginScrollView(viewRect, ScrollPosition, graphRect);
                 {
+                    EditorGUI.DrawRect(yAxisRect, Color.gray);
+                    for(float i = 1.0f;
+                        i >= 0;
+                        i -= 0.1f)
+                    {
+                        // NOTE(SpectatorQL): Need to do this because labels are drawn in such a way that
+                        // the text of a particular label doesn't line up exactly with points on the graph.
+                        float labelOffsetY = -8.0f;
+                        float y = ((1 - i) * yAxisRect.height) + yAxisRect.y + labelOffsetY;
+                        float height = yAxisRect.height / 10.0f;
+                        Rect yAxisLabelRect = new Rect(yAxisRect.x, y, yAxisRect.width, height);
+                        EditorGUI.LabelField(yAxisLabelRect, $"{i.ToString("0.0")}");
+                    }
+
+
                     Rect[] waveChunkRects = new Rect[waveCount];
                     for(int i = 0;
                         i < waveCount;
@@ -206,7 +222,7 @@ namespace PTA
                         waveChunkRects[i].y = waveChunkPositions[i].y;
                         waveChunkRects[i].width = waveChunkSizes[i].x;
                         waveChunkRects[i].height = waveChunkSizes[i].y;
-#if false
+#if true
                         Color debugChunkColor = new Color();
                         debugChunkColor.a = 1.0f;
                         debugChunkColor.r = (float)i / (waveCount - 1);
@@ -257,8 +273,8 @@ namespace PTA
                             float xOffset = 4.5f;
                             float x1 = waveChunkRects[i].x + xOffset;
                             float x2 = waveChunkRects[i + 1].x + xOffset;
-                            float y1 = (waveChunkRects[i].height + waveChunkRects[i].y) * f1;
-                            float y2 = (waveChunkRects[i + 1].height + waveChunkRects[i + 1].y) * f2;
+                            float y1 = (waveChunkRects[i].height * f1) + waveChunkRects[i].y;
+                            float y2 = (waveChunkRects[i + 1].height * f2) + waveChunkRects[i + 1].y;
                             Vector2 currentWaveProbPoint = new Vector2(x1, y1);
                             Vector2 nextWaveProbPoint = new Vector2(x2, y2);
 
