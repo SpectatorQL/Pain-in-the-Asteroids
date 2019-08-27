@@ -65,6 +65,7 @@ namespace PTA
             wnd.Show();
         }
         // NOTE(SpectatorQL): I know I could've used EditorGUILayout versions of these, I know, I'm dumb.
+        // TODO(SpectatorQL): Sane way of doing this kind of stuff !!!
         void OnGUI()
         {
             float firstRowHeight = 24;
@@ -191,8 +192,7 @@ namespace PTA
                     waveChunkX += waveChunkWidth;
                     graphRectWidth += waveChunkWidth;
                 }
-                graphRectHeight += yAxisRect.width;
-
+                
                 Rect graphRect = new Rect(viewRect.x, viewRect.y, graphRectWidth, graphRectHeight);
 
 
