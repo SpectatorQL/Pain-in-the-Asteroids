@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace PTA
@@ -194,8 +195,17 @@ namespace PTA
         public PTAAlignment EntityAlignment;
         
         public bool Invincibility;
-        
-        Vector2 MapDimensions;
+
+        struct PlayAreaDimensions
+        {
+            public float MinX;
+            public float MinY;
+            public float MaxX;
+            public float MaxY;
+            public Vector2 Center;
+        }
+
+        PlayAreaDimensions PlayArea;
         
         [EnumNamedArray(typeof(EntityType))]
         public Sprite[] Sprites = new Sprite[(int)EntityType.Count];
@@ -210,17 +220,38 @@ namespace PTA
                 Debug.LogError("Layers are missing! Check the layers settings in Edit/Project Settings/Tags and Layers !");
             }
             
-            PTAWall[] walls = FindObjectsOfType<PTAWall>();
-            for(int i = 0;
-                i < walls.Length;
-                ++i)
-            {
-                walls[i].World = this;
-            }
-            // TODO(SpectatorQL): Safeguard this against future changes!
-            MapDimensions = new Vector2(walls[0].transform.position.x, walls[0].transform.position.y);
-            
-            
+
+            Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 10));
+            Vector2 topRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 10));
+            float offscreenOffset = 1.0f;
+            PlayArea.MinX = bottomLeft.x - offscreenOffset;
+            PlayArea.MinY = bottomLeft.y - offscreenOffset;
+            PlayArea.MaxX = topRight.x + offscreenOffset;
+            PlayArea.MaxY = topRight.y + offscreenOffset;
+            PlayArea.Center = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, 10));
+
+            // TODO: Instantiate a prefab instead.
+            PTAWall[] xWalls = FindObjectsOfType<PTAWall>()
+                .Where(wall => { return wall.WallTypeID == PTAWall.WallType.XWall; })
+                .ToArray();
+            Debug.Assert(xWalls.Length == 2);
+
+            xWalls[0].World = this;
+            xWalls[0].gameObject.transform.position = new Vector2(PlayArea.MinX, PlayArea.Center.y);
+            xWalls[1].World = this;
+            xWalls[1].gameObject.transform.position = new Vector2(PlayArea.MaxX, PlayArea.Center.y);
+
+            PTAWall[] yWalls = FindObjectsOfType<PTAWall>()
+                .Where(wall => { return wall.WallTypeID == PTAWall.WallType.YWall; })
+                .ToArray();
+            Debug.Assert(yWalls.Length == 2);
+
+            yWalls[0].World = this;
+            yWalls[0].gameObject.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MinY);
+            yWalls[1].World = this;
+            yWalls[1].gameObject.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MaxY);
+
+
             Entities = new PTAEntity[ENTITY_COUNT];
             for(int i = 0;
                 i < ENTITY_COUNT;
@@ -266,7 +297,7 @@ namespace PTA
         void Update()
         {
             float dt = Time.deltaTime;
-            
+
             if(HostileEntities == 0)
             {
                 if(CurrentWave < MAX_WAVE)
@@ -287,8 +318,8 @@ namespace PTA
                             // TODO(SpectatorQL): Move the position outside the player's bounding box.
                             do
                             {
-                                entityPosition.x = UnityEngine.Random.Range(-MapDimensions.x, MapDimensions.x);
-                                entityPosition.y = UnityEngine.Random.Range(-MapDimensions.y, MapDimensions.y);
+                                entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
+                                entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
                             } while(entityPosition == PlayerEntity.Transform.position);
                             hostileEntity.Transform.position = entityPosition;
                         }
@@ -304,7 +335,7 @@ namespace PTA
                     Debug.Log("YOU WIN!!!");
                 }
             }
-            
+
             for(int i = 0;
                 i < ENTITY_COUNT;
                 ++i)
