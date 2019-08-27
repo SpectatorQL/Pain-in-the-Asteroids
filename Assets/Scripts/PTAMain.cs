@@ -275,7 +275,7 @@ namespace PTA
             PTAEntity propulsion = PTAEntity.CreateEntity(this, EntityType.Propulsion);
             propulsion.Transform.position = new Vector2(0.0f, -2.5f);
 #else
-            Invicibility = false;
+            Invincibility = false;
 #endif
         }
         
