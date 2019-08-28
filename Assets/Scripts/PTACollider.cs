@@ -90,9 +90,10 @@ namespace PTA
                     else if(Self.EntityTypeID == EntityType.Player
                         && other.EntityTypeID == EntityType.Enemy)
                     {
-                        // TODO(SpectatorQL): I-frames!
                         if(!World.Invincibility)
                         {
+                            World.StartCoroutine(World.TemporaryInvincibility());
+
                             World.FreeEntities.Add(other);
 
                             --Self.Data.Health;

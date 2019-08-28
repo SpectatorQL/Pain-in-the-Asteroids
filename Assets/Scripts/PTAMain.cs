@@ -345,6 +345,15 @@ namespace PTA
             yield return null;
         }
 
+        public IEnumerator TemporaryInvincibility()
+        {
+            Invincibility = true;
+            yield return new WaitForSeconds(2.0f);
+
+            Invincibility = false;
+            yield return null;
+        }
+
         void Update()
         {
             float dt = Time.deltaTime;
