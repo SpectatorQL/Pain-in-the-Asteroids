@@ -215,6 +215,8 @@ namespace PTA
         }
 
         PlayAreaDimensions PlayArea;
+
+        PTAUI UI;
         
         [EnumNamedArray(typeof(EntityType))]
         public Sprite[] Sprites = new Sprite[(int)EntityType.Count];
@@ -319,6 +321,8 @@ namespace PTA
 #else
             Invincibility = false;
 #endif
+
+            UI = FindObjectOfType<PTAUI>();
         }
         
         // TODO(SpectatorQL): Is it necessary to split Move and Think?
@@ -387,6 +391,8 @@ namespace PTA
                     }
                     
                     ++CurrentWave;
+
+                    UI.WaveText.text = $"Wave: {CurrentWave}";
                 }
                 else
                 {
