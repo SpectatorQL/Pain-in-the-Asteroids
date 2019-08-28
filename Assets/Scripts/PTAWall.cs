@@ -4,15 +4,18 @@ using UnityEngine;
 
 namespace PTA
 {
+    public enum WallType
+    {
+        XWall,
+        YWall,
+
+        Count
+    }
+
     public class PTAWall : MonoBehaviour
     {
         public PTAMain World;
-
-        public enum WallType
-        {
-            XWall,
-            YWall,
-        }
+        public BoxCollider2D BoxCollider;
         
         public WallType WallTypeID;
 

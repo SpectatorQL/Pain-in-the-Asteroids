@@ -191,6 +191,7 @@ namespace PTA
         public PTAEnemyProbability EnemyProbability;
         
         public GameObject EntityPrefab;
+        public GameObject WallPrefab;
         
         public PTAAlignment EntityAlignment;
         
@@ -230,26 +231,59 @@ namespace PTA
             PlayArea.MaxY = topRight.y + offscreenOffset;
             PlayArea.Center = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, 10));
 
-            // TODO: Instantiate a prefab instead.
-            PTAWall[] xWalls = FindObjectsOfType<PTAWall>()
-                .Where(wall => { return wall.WallTypeID == PTAWall.WallType.XWall; })
-                .ToArray();
-            Debug.Assert(xWalls.Length == 2);
+            Vector2 xWallSize = new Vector2(1.0f, PlayArea.MaxY - PlayArea.MinY);
+            Vector2 yWallSize = new Vector2(PlayArea.MaxX - PlayArea.MinX, 1.0f);
 
-            xWalls[0].World = this;
-            xWalls[0].gameObject.transform.position = new Vector2(PlayArea.MinX, PlayArea.Center.y);
-            xWalls[1].World = this;
-            xWalls[1].gameObject.transform.position = new Vector2(PlayArea.MaxX, PlayArea.Center.y);
+            const int WALL_COUNT = 2;
+            for(WallType i = 0;
+                i < WallType.Count;
+                ++i)
+            {
+                for(int j = 0;
+                    j < WALL_COUNT;
+                    ++j)
+                {
+                    PTAWall wall = Instantiate(WallPrefab).GetComponent<PTAWall>();
+                    wall.World = this;
+                    wall.BoxCollider = wall.gameObject.GetComponent<BoxCollider2D>();
+                    wall.WallTypeID = i;
+                    if(wall.WallTypeID == WallType.XWall)
+                    {
+                        wall.BoxCollider.size = xWallSize;
+                    }
+                    else if(wall.WallTypeID == WallType.YWall)
+                    {
+                        wall.BoxCollider.size = yWallSize;
+                    }
 
-            PTAWall[] yWalls = FindObjectsOfType<PTAWall>()
-                .Where(wall => { return wall.WallTypeID == PTAWall.WallType.YWall; })
-                .ToArray();
-            Debug.Assert(yWalls.Length == 2);
-
-            yWalls[0].World = this;
-            yWalls[0].gameObject.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MinY);
-            yWalls[1].World = this;
-            yWalls[1].gameObject.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MaxY);
+                    if(j == 0)
+                    {
+                        if(wall.WallTypeID == WallType.XWall)
+                        {
+                            wall.transform.position = new Vector2(PlayArea.MinX, PlayArea.Center.y);
+                        }
+                        else if(wall.WallTypeID == WallType.YWall)
+                        {
+                            wall.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MinY);
+                        }
+                    }
+                    else if(j == 1)
+                    {
+                        if(wall.WallTypeID == WallType.XWall)
+                        {
+                            wall.transform.position = new Vector2(PlayArea.MaxX, PlayArea.Center.y);
+                        }
+                        else if(wall.WallTypeID == WallType.YWall)
+                        {
+                            wall.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MaxY);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError($"Error! Too many walls of type {i} have been spawned!");
+                    }
+                }
+            }
 
 
             Entities = new PTAEntity[ENTITY_COUNT];
