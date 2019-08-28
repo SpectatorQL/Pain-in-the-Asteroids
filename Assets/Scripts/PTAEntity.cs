@@ -47,6 +47,7 @@ namespace PTA
         public EnemyType EnemyTypeID;
         public bool IsActive;
         public bool IsHostile;
+        public bool Spawned;
 
         // TODO(SpectatorQL): Figure out whether we really need all of the stuff that's in a GameObject!
         // NOTE(SpectatorQL): We can't get rid of this because of SetActive() and layer.
@@ -166,6 +167,8 @@ namespace PTA
                     entity.GameObject.layer = ThingsLayer;
                     entity.Transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
 
+                    entity.Spawned = false;
+
                     EntityData entityData = new EntityData();
                     EnemyType enemyType = DetermineEnemyType(world);
                     switch(enemyType)
@@ -206,6 +209,9 @@ namespace PTA
 
                     entityMaterial.color = Color.white;
 
+                    entity.Move = MoveFunctions.MoveStub;
+                    entity.Think = ThinkFunctions.ThinkStub;
+
                     entity.GameObject.layer = ThingsLayer;
                     break;
                 }
@@ -216,6 +222,9 @@ namespace PTA
 
                     entityMaterial.color = Color.white;
 
+                    entity.Move = MoveFunctions.MoveStub;
+                    entity.Think = ThinkFunctions.ThinkStub;
+
                     entity.GameObject.layer = ThingsLayer;
                     break;
                 }
@@ -225,6 +234,9 @@ namespace PTA
                     entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 
                     entityMaterial.color = Color.white;
+
+                    entity.Move = MoveFunctions.MoveStub;
+                    entity.Think = ThinkFunctions.ThinkStub;
 
                     entity.Data.MovementSpeed = 0.3f;
                     break;
@@ -267,6 +279,7 @@ namespace PTA
             entity.Rigidbody = entityObject.GetComponent<Rigidbody2D>();
             entity.Renderer = entityObject.GetComponent<SpriteRenderer>();
             entity.Collider = entityObject.GetComponent<PTACollider>();
+            entity.Collider.BoxCollider = entityObject.GetComponent<BoxCollider2D>();
             entity.Collider.Self = entity;
             entity.Collider.World = world;
 

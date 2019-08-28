@@ -27,6 +27,10 @@ namespace PTA
         
         public static void SineMove(PTAEntity entity)
         {
+            if(entity.EntityTypeID == EntityType.Enemy
+                && !entity.Spawned)
+                return;
+
             entity.Rigidbody.velocity = Vector2.zero;
             
             Vector2 newPosition = entity.Transform.position;
@@ -48,6 +52,10 @@ namespace PTA
         
         public static void LinearMove(PTAEntity entity)
         {
+            if(entity.EntityTypeID == EntityType.Enemy
+                && !entity.Spawned)
+                return;
+
             entity.Rigidbody.velocity = Vector2.zero;
             
             Vector2 newPosition = (Vector2)entity.Transform.position + entity.Data.MoveDirection.normalized * entity.Data.MovementSpeed;
@@ -328,6 +336,15 @@ namespace PTA
             }
         }
         
+        IEnumerator WaitBeforeActivatingEntity(PTAEntity entity)
+        {
+            yield return new WaitForSeconds(2.0f);
+
+            entity.Collider.BoxCollider.enabled = true;
+            entity.Spawned = true;
+            yield return null;
+        }
+
         void Update()
         {
             float dt = Time.deltaTime;
@@ -349,13 +366,12 @@ namespace PTA
                             hostileEntity.Think = ThinkFunctions.HostileThink;
                             
                             Vector3 entityPosition = new Vector3();
-                            // TODO(SpectatorQL): Move the position outside the player's bounding box.
-                            do
-                            {
-                                entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
-                                entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
-                            } while(entityPosition == PlayerEntity.Transform.position);
+                            entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
+                            entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
                             hostileEntity.Transform.position = entityPosition;
+
+                            hostileEntity.Collider.BoxCollider.enabled = false;
+                            StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
                         }
                         
                         --newEnemiesCount;

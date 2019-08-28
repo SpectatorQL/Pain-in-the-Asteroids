@@ -11,10 +11,6 @@ namespace PTA
         
         public PTAMain World;
         
-        void Start()
-        {
-            BoxCollider = GetComponent<BoxCollider2D>();
-        }
         // NOTE(SpectatorQL): Some day I need to learn how to handle a mess like this...
         // Like, where does this code _actually_ belong? What should it _actually_ do?
         // Create messages for the world to process? Act immediately, like I do here?
