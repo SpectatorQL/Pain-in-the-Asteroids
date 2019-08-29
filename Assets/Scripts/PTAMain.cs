@@ -178,8 +178,18 @@ namespace PTA
     public class PTAEnemyProbability
     {
         // TODO(SpectatorQL): Make an editor extension for setting these!
-        public float[] Values = new float[PTAMain.MAX_WAVE * (int)EnemyType.Count];
+        public float[] Values = new float[PTAWaveData.MAX_WAVE * (int)EnemyType.Count];
         public const float PROBABILITY_TOTAL = 1.0f;
+    }
+
+    [Serializable]
+    public class PTAWaveData
+    {
+        public int EnemyCount;
+        public int EnemiesOnScreen;
+
+        public int CurrentWave;
+        public const int MAX_WAVE = 20;
     }
     
     public class PTAMain : MonoBehaviour
@@ -190,12 +200,8 @@ namespace PTA
         // TODO(SpectatorQL): Callers should not be allowed to use this directly due to the fact that it doesn't re-initialize entities!
         public PTAFreeEntities FreeEntities = new PTAFreeEntities();
         public PTAEntity PlayerEntity;
-        
-        public int HostileEntities;
-        
-        public const int MAX_WAVE = 4;
-        public int CurrentWave;
-        
+
+        public PTAWaveData WaveData;
         public PTAEnemyProbability EnemyProbability;
         
         public GameObject EntityPrefab;
@@ -362,13 +368,17 @@ namespace PTA
         {
             float dt = Time.deltaTime;
 
-            if(HostileEntities == 0)
+            if(WaveData.EnemyCount <= 0)
             {
-                if(CurrentWave < MAX_WAVE)
+                if(WaveData.CurrentWave < PTAWaveData.MAX_WAVE)
                 {
-                    int newEnemiesCount = 4;
-                    HostileEntities = newEnemiesCount;
-                    while(newEnemiesCount > 0)
+                    int nextWave = WaveData.CurrentWave + 1;
+                    WaveData.EnemyCount = nextWave;
+                    WaveData.EnemiesOnScreen = nextWave;
+
+                    int newEnemies = WaveData.EnemyCount;
+                    WaveData.EnemiesOnScreen = newEnemies;
+                    while(newEnemies > 0)
                     {
                         PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
                         if(hostileEntity != null)
@@ -377,7 +387,7 @@ namespace PTA
                             hostileEntity.Move = MoveFunctions.LinearMove;
                             hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                             hostileEntity.Think = ThinkFunctions.HostileThink;
-                            
+
                             Vector3 entityPosition = new Vector3();
                             entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
                             entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
@@ -386,18 +396,48 @@ namespace PTA
                             hostileEntity.Collider.BoxCollider.enabled = false;
                             StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
                         }
-                        
-                        --newEnemiesCount;
-                    }
-                    
-                    ++CurrentWave;
 
-                    UI.WaveText.text = $"Wave: {CurrentWave}";
+                        --newEnemies;
+                    }
+
+                    WaveData.CurrentWave = nextWave;
+
+                    UI.WaveText.text = $"Wave: {WaveData.CurrentWave}";
                 }
                 else
                 {
                     // TODO(SpectatorQL): End screen.
                     Debug.Log("YOU WIN!!!");
+                }
+            }
+            else if(WaveData.EnemiesOnScreen == 0)
+            {
+                int newEnemies = WaveData.CurrentWave;
+                if(newEnemies > WaveData.EnemyCount)
+                {
+                    newEnemies = WaveData.EnemyCount;
+                }
+                WaveData.EnemiesOnScreen = newEnemies;
+                while(newEnemies > 0)
+                {
+                    PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
+                    if(hostileEntity != null)
+                    {
+                        hostileEntity.IsHostile = true;
+                        hostileEntity.Move = MoveFunctions.LinearMove;
+                        hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
+                        hostileEntity.Think = ThinkFunctions.HostileThink;
+
+                        Vector3 entityPosition = new Vector3();
+                        entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
+                        entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
+                        hostileEntity.Transform.position = entityPosition;
+
+                        hostileEntity.Collider.BoxCollider.enabled = false;
+                        StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
+                    }
+
+                    --newEnemies;
                 }
             }
 

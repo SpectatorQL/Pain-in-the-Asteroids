@@ -109,7 +109,7 @@ namespace PTA
                 i < enemyTypeCount;
                 ++i)
             {
-                int index = world.CurrentWave * enemyTypeCount + i;
+                int index = world.WaveData.CurrentWave * enemyTypeCount + i;
                 Debug.Assert(index < enemyProb.Length);
                 if(randomPoint < enemyProb[index])
                 {

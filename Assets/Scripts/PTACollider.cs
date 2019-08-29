@@ -81,7 +81,8 @@ namespace PTA
 
                             if(Self.IsHostile)
                             {
-                                --World.HostileEntities;
+                                --World.WaveData.EnemyCount;
+                                --World.WaveData.EnemiesOnScreen;
                             }
                             Debug.Log("You are dead. Not a big suprise.");
                         }
@@ -142,7 +143,8 @@ namespace PTA
 
                             if(Self.IsHostile)
                             {
-                                --World.HostileEntities;
+                                --World.WaveData.EnemyCount;
+                                --World.WaveData.EnemiesOnScreen;
                             }
                             Debug.Log("You are dead. Not a big surprise.");
                         }

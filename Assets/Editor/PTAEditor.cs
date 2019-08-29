@@ -71,13 +71,13 @@ namespace PTA
             float firstRowHeight = 24;
             
             Rect waveLabelRect = new Rect(0, 0, 80, firstRowHeight);
-            EditorGUI.LabelField(waveLabelRect, $"Wave ({0}-{PTAMain.MAX_WAVE - 1})");
+            EditorGUI.LabelField(waveLabelRect, $"Wave ({0}-{PTAWaveData.MAX_WAVE - 1})");
             
             Rect waveFieldRect = new Rect(waveLabelRect.width, 0, 32, firstRowHeight);
             Wave = EditorGUI.IntField(waveFieldRect, Wave);
-            if(Wave >= PTAMain.MAX_WAVE)
+            if(Wave >= PTAWaveData.MAX_WAVE)
             {
-                Wave = PTAMain.MAX_WAVE - 1;
+                Wave = PTAWaveData.MAX_WAVE - 1;
             }
             else if(Wave < 0)
             {
@@ -177,7 +177,7 @@ namespace PTA
                 float graphRectWidth = 0.0f;
                 float graphRectHeight = viewRect.height;
 
-                int waveCount = PTAMain.MAX_WAVE;
+                int waveCount = PTAWaveData.MAX_WAVE;
                 Vector2[] waveChunkPositions = new Vector2[waveCount];
                 Vector2[] waveChunkSizes = new Vector2[waveCount];
                 for(int i = 0;
