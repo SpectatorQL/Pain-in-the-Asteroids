@@ -218,6 +218,7 @@ namespace PTA
     {
         public int EnemyCount;
         public int EnemiesOnScreen;
+        public int MaxSpawnedEnemiesOnScreen = 8;
 
         public int CurrentWave;
         public static int MAX_WAVE = 20;
@@ -399,15 +400,40 @@ namespace PTA
         {
             float dt = Time.deltaTime;
 
-            if(WaveData.EnemyCount <= 0)
+            if(WaveData.EnemyCount > 0)
+            {
+                // TODO(SpectatorQL): Do I want "rogue" detached entities to increment EnemiesOnScreen? I don't think I do but we'll see.
+                if(WaveData.EnemiesOnScreen < WaveData.MaxSpawnedEnemiesOnScreen
+                    && WaveData.EnemiesOnScreen < WaveData.EnemyCount)
+                {
+                    PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
+                    if(hostileEntity != null)
+                    {
+                        hostileEntity.IsHostile = true;
+                        hostileEntity.Move = MoveFunctions.LinearMove;
+                        hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
+                        hostileEntity.Think = ThinkFunctions.HostileThink;
+
+                        Vector3 entityPosition = new Vector3();
+                        entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
+                        entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
+                        hostileEntity.Transform.position = entityPosition;
+
+                        hostileEntity.Collider.BoxCollider.enabled = false;
+                        StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
+                    }
+
+                    ++WaveData.EnemiesOnScreen;
+                }
+            }
+            else
             {
                 if(WaveData.CurrentWave < PTAWaveData.MAX_WAVE)
                 {
                     int nextWave = WaveData.CurrentWave + 1;
                     WaveData.EnemyCount = nextWave;
-                    WaveData.EnemiesOnScreen = nextWave;
 
-                    int newEnemies = WaveData.EnemyCount;
+                    int newEnemies = (nextWave < WaveData.MaxSpawnedEnemiesOnScreen) ? nextWave : WaveData.MaxSpawnedEnemiesOnScreen;
                     WaveData.EnemiesOnScreen = newEnemies;
                     while(newEnemies > 0)
                     {
@@ -439,36 +465,6 @@ namespace PTA
                 {
                     // TODO(SpectatorQL): End screen.
                     Debug.Log("YOU WIN!!!");
-                }
-            }
-            else if(WaveData.EnemiesOnScreen == 0)
-            {
-                int newEnemies = WaveData.CurrentWave;
-                if(newEnemies > WaveData.EnemyCount)
-                {
-                    newEnemies = WaveData.EnemyCount;
-                }
-                WaveData.EnemiesOnScreen = newEnemies;
-                while(newEnemies > 0)
-                {
-                    PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
-                    if(hostileEntity != null)
-                    {
-                        hostileEntity.IsHostile = true;
-                        hostileEntity.Move = MoveFunctions.LinearMove;
-                        hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
-                        hostileEntity.Think = ThinkFunctions.HostileThink;
-
-                        Vector3 entityPosition = new Vector3();
-                        entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
-                        entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
-                        hostileEntity.Transform.position = entityPosition;
-
-                        hostileEntity.Collider.BoxCollider.enabled = false;
-                        StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
-                    }
-
-                    --newEnemies;
                 }
             }
 
