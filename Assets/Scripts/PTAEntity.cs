@@ -22,8 +22,10 @@ namespace PTA
         Invalid,
         Player,
         Enemy,
+
         Turret,
         Propulsion,
+
         Bullet,
 
         Count

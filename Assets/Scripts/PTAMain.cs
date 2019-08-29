@@ -212,13 +212,18 @@ namespace PTA
         public float[] Values = new float[PTAWaveData.MAX_WAVE * (int)EnemyType.Count];
         public const float PROBABILITY_TOTAL = 1.0f;
     }
-
-    [Serializable]
+    
     public class PTAWaveData
     {
         public int EnemyCount;
         public int EnemiesOnScreen;
         public int MaxSpawnedEnemiesOnScreen = 8;
+
+        public int PowerupCount;
+        public float MaxPowerupsOnScreen = 10;
+        public float PowerupWaitTime = 5.0f;
+        public float MinPowerupWaitTime = 2.5f;
+        public float RunningPowerupTime;
 
         public int CurrentWave;
         public static int MAX_WAVE = 20;
@@ -233,7 +238,7 @@ namespace PTA
         public PTAFreeEntities FreeEntities = new PTAFreeEntities();
         public PTAEntity PlayerEntity;
 
-        public PTAWaveData WaveData;
+        public PTAWaveData WaveData = new PTAWaveData();
         public PTAEnemyProbability EnemyProbability;
         
         public GameObject EntityPrefab;
@@ -258,7 +263,18 @@ namespace PTA
         
         [EnumNamedArray(typeof(EntityType))]
         public Sprite[] Sprites = new Sprite[(int)EntityType.Count];
-        
+
+        Vector2 GenerateEntityPosition()
+        {
+            Vector2 result = new Vector2();
+
+            float safetyNet = 1.0f;
+            result.x = UnityEngine.Random.Range(PlayArea.MinX + safetyNet, PlayArea.MaxX - safetyNet);
+            result.y = UnityEngine.Random.Range(PlayArea.MinY + safetyNet, PlayArea.MaxY - safetyNet);
+
+            return result;
+        }
+
         void Start()
         {
             PTAEntity.PlayerLayer = LayerMask.NameToLayer("Player");
@@ -346,16 +362,16 @@ namespace PTA
             
 #if UNITY_EDITOR
             PTAEntity turretL = PTAEntity.CreateEntity(this, EntityType.Turret);
-            turretL.Transform.position = new Vector2(-9.0f, -3.0f);
+            turretL.Transform.position = GenerateEntityPosition();
             
             PTAEntity turretR = PTAEntity.CreateEntity(this, EntityType.Turret);
-            turretR.Transform.position = new Vector2(5.0f, -3.0f);
-            
+            turretR.Transform.position = GenerateEntityPosition();
+
             PTAEntity freeTurret = PTAEntity.CreateEntity(this, EntityType.Turret);
-            freeTurret.Transform.position = new Vector2(8.0f, 1.5f);
-            
+            freeTurret.Transform.position = GenerateEntityPosition();
+
             PTAEntity propulsion = PTAEntity.CreateEntity(this, EntityType.Propulsion);
-            propulsion.Transform.position = new Vector2(0.0f, -2.5f);
+            propulsion.Transform.position = GenerateEntityPosition();
 #else
             Invincibility = false;
 #endif
@@ -413,11 +429,8 @@ namespace PTA
                         hostileEntity.Move = MoveFunctions.LinearMove;
                         hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         hostileEntity.Think = ThinkFunctions.HostileThink;
-
-                        Vector3 entityPosition = new Vector3();
-                        entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
-                        entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
-                        hostileEntity.Transform.position = entityPosition;
+                        
+                        hostileEntity.Transform.position = GenerateEntityPosition();
 
                         hostileEntity.Collider.BoxCollider.enabled = false;
                         StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
@@ -444,11 +457,8 @@ namespace PTA
                             hostileEntity.Move = MoveFunctions.LinearMove;
                             hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                             hostileEntity.Think = ThinkFunctions.HostileThink;
-
-                            Vector3 entityPosition = new Vector3();
-                            entityPosition.x = UnityEngine.Random.Range(PlayArea.MinX, PlayArea.MaxX);
-                            entityPosition.y = UnityEngine.Random.Range(PlayArea.MinY, PlayArea.MaxY);
-                            hostileEntity.Transform.position = entityPosition;
+                            
+                            hostileEntity.Transform.position = GenerateEntityPosition();
 
                             hostileEntity.Collider.BoxCollider.enabled = false;
                             StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
@@ -458,6 +468,12 @@ namespace PTA
                     }
 
                     WaveData.CurrentWave = nextWave;
+                    
+                    if(WaveData.CurrentWave % 5 == 0
+                        && WaveData.PowerupWaitTime < WaveData.MinPowerupWaitTime)
+                    {
+                        WaveData.PowerupWaitTime -= 0.5f;
+                    }
 
                     UI.WaveText.text = $"Wave: {WaveData.CurrentWave}";
                 }
@@ -467,6 +483,24 @@ namespace PTA
                     Debug.Log("YOU WIN!!!");
                 }
             }
+
+            if(WaveData.PowerupCount < WaveData.MaxPowerupsOnScreen)
+            {
+                if(WaveData.RunningPowerupTime < 0)
+                {
+                    // NOTE(SpectatorQL): Oh, so this thing is _exclusive_ but the float version is _inclusive_. Gotta love Unity...
+                    EntityType powerupType = (EntityType)UnityEngine.Random.Range((int)EntityType.Turret, (int)(EntityType.Propulsion + 1));
+                    Debug.Assert(powerupType < EntityType.Count);
+                    PTAEntity powerupEntity = PTAEntity.CreateEntity(this, powerupType);
+                    if(powerupEntity != null)
+                    {
+                        powerupEntity.Transform.position = GenerateEntityPosition();
+                    }
+                    WaveData.RunningPowerupTime = WaveData.PowerupWaitTime;
+                }
+            }
+            WaveData.RunningPowerupTime -= dt;
+
 
             for(int i = 0;
                 i < ENTITY_COUNT;
