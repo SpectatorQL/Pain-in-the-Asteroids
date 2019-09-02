@@ -15,6 +15,7 @@ namespace PTA
         public float RunningAttackSpeed;
         public float MovementSpeed;
         public float TSine;
+        public float TimeToSpawn;
     }
 
     public enum EntityType
@@ -199,6 +200,7 @@ namespace PTA
                     }
                     
                     entityData.MovementSpeed = 0.08f;
+                    entityData.TimeToSpawn = 2.0f;
 
                     entity.EnemyTypeID = enemyType;
                     entity.Data = entityData;

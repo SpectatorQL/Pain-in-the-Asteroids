@@ -72,6 +72,30 @@ namespace PTA
         
         public static void HostileThink(PTAMain world, PTAEntity entity, float dt)
         {
+            float timeToSpawn = entity.Data.TimeToSpawn;
+            Color fadingEntityColor = entity.Renderer.material.color;
+            if(timeToSpawn > 0)
+            {
+                if(fadingEntityColor.a < 0)
+                {
+                    fadingEntityColor.a = 1.0f;
+                }
+                fadingEntityColor.a -= dt;
+                entity.Renderer.material.color = fadingEntityColor;
+                timeToSpawn -= dt;
+                entity.Data.TimeToSpawn = timeToSpawn;
+
+                if(timeToSpawn > 0)
+                    return;
+            }
+            else
+            {
+                fadingEntityColor.a = 1.0f;
+                entity.Renderer.material.color = fadingEntityColor;
+
+                entity.Collider.BoxCollider.enabled = true;
+                entity.Spawned = true;
+            }
         }
         
         public static void PlayerThink(PTAMain world, PTAEntity entity, float dt)
@@ -206,10 +230,9 @@ namespace PTA
         UNITY IS DOGSHIT
     */
     // BIIIIIG TODO(SpectatorQL): A workaround...
-    [Serializable]
     public class PTAEnemyProbability
     {
-        public float[] Values = new float[PTAWaveData.MAX_WAVE * (int)EnemyType.Count];
+        public float[] Values;
         public const float PROBABILITY_TOTAL = 1.0f;
     }
     
@@ -226,7 +249,8 @@ namespace PTA
         public float RunningPowerupTime;
 
         public int CurrentWave;
-        public static int MAX_WAVE = 20;
+        public int MaxWave = 20;
+        public const int MAX_WAVE = 20;
     }
     
     public class PTAMain : MonoBehaviour
@@ -350,6 +374,10 @@ namespace PTA
             }
 
 
+            EnemyProbability = new PTAEnemyProbability();
+            EnemyProbability.Values = new float[WaveData.MaxWave * (int)EnemyType.Count];
+
+
             Entities = new PTAEntity[ENTITY_COUNT];
             for(int i = 0;
                 i < ENTITY_COUNT;
@@ -393,15 +421,6 @@ namespace PTA
                 }
             }
         }
-        
-        IEnumerator WaitBeforeActivatingEntity(PTAEntity entity)
-        {
-            yield return new WaitForSeconds(2.0f);
-
-            entity.Collider.BoxCollider.enabled = true;
-            entity.Spawned = true;
-            yield return null;
-        }
 
         public IEnumerator TemporaryInvincibility()
         {
@@ -433,21 +452,22 @@ namespace PTA
                         hostileEntity.Transform.position = GenerateEntityPosition();
 
                         hostileEntity.Collider.BoxCollider.enabled = false;
-                        StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
                     }
 
                     ++WaveData.EnemiesOnScreen;
+                    Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount);
                 }
             }
             else
             {
-                if(WaveData.CurrentWave < PTAWaveData.MAX_WAVE)
+                if(WaveData.CurrentWave < WaveData.MaxWave)
                 {
                     int nextWave = WaveData.CurrentWave + 1;
                     WaveData.EnemyCount = nextWave;
 
                     int newEnemies = (nextWave < WaveData.MaxSpawnedEnemiesOnScreen) ? nextWave : WaveData.MaxSpawnedEnemiesOnScreen;
                     WaveData.EnemiesOnScreen = newEnemies;
+                    Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount);
                     while(newEnemies > 0)
                     {
                         PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
@@ -461,7 +481,6 @@ namespace PTA
                             hostileEntity.Transform.position = GenerateEntityPosition();
 
                             hostileEntity.Collider.BoxCollider.enabled = false;
-                            StartCoroutine(WaitBeforeActivatingEntity(hostileEntity));
                         }
 
                         --newEnemies;
