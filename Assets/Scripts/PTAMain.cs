@@ -191,6 +191,8 @@ namespace PTA
                 result = Entities[Top];
                 result.GameObject.SetActive(true);
                 result.IsActive = true;
+
+                Entities[Top] = null;
                 --Top;
             }
             
@@ -391,15 +393,19 @@ namespace PTA
 #if UNITY_EDITOR
             PTAEntity turretL = PTAEntity.CreateEntity(this, EntityType.Turret);
             turretL.Transform.position = GenerateEntityPosition();
+            ++WaveData.PowerupCount;
             
             PTAEntity turretR = PTAEntity.CreateEntity(this, EntityType.Turret);
             turretR.Transform.position = GenerateEntityPosition();
+            ++WaveData.PowerupCount;
 
             PTAEntity freeTurret = PTAEntity.CreateEntity(this, EntityType.Turret);
             freeTurret.Transform.position = GenerateEntityPosition();
+            ++WaveData.PowerupCount;
 
             PTAEntity propulsion = PTAEntity.CreateEntity(this, EntityType.Propulsion);
             propulsion.Transform.position = GenerateEntityPosition();
+            ++WaveData.PowerupCount;
 #else
             Invincibility = false;
 #endif
@@ -466,7 +472,7 @@ namespace PTA
                 int nextWave = WaveData.CurrentWave + 1;
                 if(nextWave < WaveData.MaxWave)
                 {
-                    int newEnemyCount = WaveData.CurrentWave + 1;
+                    int newEnemyCount = nextWave;
                     WaveData.EnemyCount = newEnemyCount;
 #if false
                     int newEnemies = (newEnemyCount < WaveData.MaxSpawnedEnemiesOnScreen) ? newEnemyCount : WaveData.MaxSpawnedEnemiesOnScreen;
