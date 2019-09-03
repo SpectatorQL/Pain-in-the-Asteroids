@@ -142,6 +142,7 @@ namespace PTA
                 if(entity == null)
                 {
                     // TODO(SpectatorQL): Do _something_ when this happens.
+                    Debug.Assert(false, "__PANIC__");
                     return null;
                 }
             }

@@ -36,6 +36,7 @@ namespace PTA
                             PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.RTurretPosition);
                             Self.RTurretSlot = other;
                         }
+                        --World.WaveData.PowerupCount;
                     }
                     else if(other.EntityTypeID == EntityType.Propulsion)
                     {
@@ -44,6 +45,7 @@ namespace PTA
                             PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.PropulsionPosition);
                             Self.PropulsionSlot = other;
                         }
+                        --World.WaveData.PowerupCount;
                     }
 
                     else if(other.EntityTypeID == EntityType.Bullet)
@@ -51,7 +53,7 @@ namespace PTA
                         World.FreeEntities.Add(other);
                         
                         --Self.Data.Health;
-                        if(Self.Data.Health == 0)
+                        if(Self.Data.Health <= 0)
                         {
                             // TODO(SpectatorQL): Percent chance for detached entities to become enemies.
                             // TODO(SpectatorQL): Percent chance for detached entities to stay on the map.
@@ -98,7 +100,7 @@ namespace PTA
                             World.FreeEntities.Add(other);
 
                             --Self.Data.Health;
-                            if(Self.Data.Health == 0)
+                            if(Self.Data.Health <= 0)
                             {
                                 World.FreeEntities.Add(Self.LTurretSlot);
                                 World.FreeEntities.Add(Self.RTurretSlot);
@@ -113,7 +115,7 @@ namespace PTA
                         && other.EntityTypeID == EntityType.Player)
                     {
                         --Self.Data.Health;
-                        if(Self.Data.Health == 0)
+                        if(Self.Data.Health <= 0)
                         {
                             // TODO(SpectatorQL): Percent chance for detached entities to become enemies.
                             // TODO(SpectatorQL): Percent chance for detached entities to stay on the map.

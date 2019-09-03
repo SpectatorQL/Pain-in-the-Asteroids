@@ -249,8 +249,8 @@ namespace PTA
         public float RunningPowerupTime;
 
         public int CurrentWave;
-        public int MaxWave = 20;
-        public const int MAX_WAVE = 20;
+        public int MaxWave = 9;
+        public const int MAX_WAVE = 9;
     }
     
     public class PTAMain : MonoBehaviour
@@ -437,6 +437,8 @@ namespace PTA
 
             if(WaveData.EnemyCount > 0)
             {
+                Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount
+                    && WaveData.EnemiesOnScreen >= 0);
                 // TODO(SpectatorQL): Do I want "rogue" detached entities to increment EnemiesOnScreen? I don't think I do but we'll see.
                 if(WaveData.EnemiesOnScreen < WaveData.MaxSpawnedEnemiesOnScreen
                     && WaveData.EnemiesOnScreen < WaveData.EnemyCount)
@@ -456,16 +458,18 @@ namespace PTA
 
                     ++WaveData.EnemiesOnScreen;
                     Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount);
+                    Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.MaxSpawnedEnemiesOnScreen);
                 }
             }
             else
             {
-                if(WaveData.CurrentWave < WaveData.MaxWave)
+                int nextWave = WaveData.CurrentWave + 1;
+                if(nextWave < WaveData.MaxWave)
                 {
-                    int nextWave = WaveData.CurrentWave + 1;
-                    WaveData.EnemyCount = nextWave;
-
-                    int newEnemies = (nextWave < WaveData.MaxSpawnedEnemiesOnScreen) ? nextWave : WaveData.MaxSpawnedEnemiesOnScreen;
+                    int newEnemyCount = WaveData.CurrentWave + 1;
+                    WaveData.EnemyCount = newEnemyCount;
+#if false
+                    int newEnemies = (newEnemyCount < WaveData.MaxSpawnedEnemiesOnScreen) ? newEnemyCount : WaveData.MaxSpawnedEnemiesOnScreen;
                     WaveData.EnemiesOnScreen = newEnemies;
                     Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount);
                     while(newEnemies > 0)
@@ -485,20 +489,22 @@ namespace PTA
 
                         --newEnemies;
                     }
-
-                    WaveData.CurrentWave = nextWave;
+#endif
                     
-                    if(WaveData.CurrentWave % 5 == 0
+                    if(nextWave % 5 == 0
                         && WaveData.PowerupWaitTime < WaveData.MinPowerupWaitTime)
                     {
                         WaveData.PowerupWaitTime -= 0.5f;
                     }
 
-                    UI.WaveText.text = $"Wave: {WaveData.CurrentWave}";
+                    UI.WaveText.text = $"Wave: {nextWave}";
+
+                    WaveData.CurrentWave = nextWave;
                 }
                 else
                 {
                     // TODO(SpectatorQL): End screen.
+                    WaveData.EnemyCount = 0;
                     Debug.Log("YOU WIN!!!");
                 }
             }
@@ -510,12 +516,14 @@ namespace PTA
                     // NOTE(SpectatorQL): Oh, so this thing is _exclusive_ but the float version is _inclusive_. Gotta love Unity...
                     EntityType powerupType = (EntityType)UnityEngine.Random.Range((int)EntityType.Turret, (int)(EntityType.Propulsion + 1));
                     Debug.Assert(powerupType < EntityType.Count);
+                    Debug.Assert(powerupType != EntityType.Enemy);
                     PTAEntity powerupEntity = PTAEntity.CreateEntity(this, powerupType);
                     if(powerupEntity != null)
                     {
                         powerupEntity.Transform.position = GenerateEntityPosition();
                     }
                     WaveData.RunningPowerupTime = WaveData.PowerupWaitTime;
+                    ++WaveData.PowerupCount;
                 }
             }
             WaveData.RunningPowerupTime -= dt;
