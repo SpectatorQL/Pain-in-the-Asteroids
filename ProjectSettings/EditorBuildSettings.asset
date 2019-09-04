@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/PainInTheAsteroids.unity
+    guid: 5d3e6924b31df9440b9eccf69dc3b58d
   m_configObjects: {}
