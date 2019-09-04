@@ -180,6 +180,57 @@ namespace PTA
             entity.IsActive = false;
             ++Top;
             Entities[Top] = entity;
+
+            for(int i = 0;
+                i < Top;
+                ++i)
+            {
+                uint selfID = Entities[i].EntityID;
+                uint appeared = 0;
+                for(int j = 0;
+                    j < Top;
+                    ++j)
+                {
+                    uint otherID = Entities[j].EntityID;
+                    if(selfID == otherID)
+                    {
+                        ++appeared;
+                    }
+                }
+
+                if(appeared > 1)
+                {
+                    Debug.Assert(false, "Enitity has been freed more than once!");
+                    PTAEntity[] sortedEntities = new PTAEntity[Top];
+                    Array.Copy(Entities, sortedEntities, Top);
+                    Array.Sort(sortedEntities, (self, other) =>
+                    {
+                        int result;
+                        if(self.EntityID > other.EntityID)
+                        {
+                            result = 1;
+                        }
+                        else if(self.EntityID == other.EntityID)
+                        {
+                            result = 0;
+                        }
+                        else
+                        {
+                            result = -1;
+                        }
+                        return result;
+                    });
+
+                    string printf = "";
+                    for(int j = 0;
+                        j < Top;
+                        ++j)
+                    {
+                        printf += $"Entity {j}: ID = {sortedEntities[j].EntityID}\n";
+                    }
+                    Debug.LogWarning(printf);
+                }
+            }
         }
         
         public PTAEntity GetNext()

@@ -46,6 +46,7 @@ namespace PTA
     public class PTAEntity
     {
         public EntityData Data;
+        public uint EntityID;
         public EntityType EntityTypeID;
         public EnemyType EnemyTypeID;
         public bool IsActive;
@@ -297,6 +298,7 @@ namespace PTA
 
             entity.IsActive = true;
 
+            entity.EntityID = (uint)world.RunningEntityIndex;
             ++world.RunningEntityIndex;
 
             return entity;
