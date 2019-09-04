@@ -441,6 +441,8 @@ namespace PTA
         {
             float dt = Time.deltaTime;
 
+            Debug.Assert(WaveData.EnemyCount >= 0);
+            Debug.Assert(WaveData.EnemiesOnScreen >= 0);
             if(WaveData.EnemyCount > 0)
             {
                 Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount
@@ -453,7 +455,11 @@ namespace PTA
                     if(hostileEntity != null)
                     {
                         hostileEntity.IsHostile = true;
+#if true
+                        hostileEntity.Move = MoveFunctions.MoveStub;
+#else
                         hostileEntity.Move = MoveFunctions.LinearMove;
+#endif
                         hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         hostileEntity.Think = ThinkFunctions.HostileThink;
                         
@@ -514,7 +520,7 @@ namespace PTA
                     Debug.Log("YOU WIN!!!");
                 }
             }
-
+#if false
             if(WaveData.PowerupCount < WaveData.MaxPowerupsOnScreen)
             {
                 if(WaveData.RunningPowerupTime < 0)
@@ -533,6 +539,7 @@ namespace PTA
                 }
             }
             WaveData.RunningPowerupTime -= dt;
+#endif
 
 
             for(int i = 0;
@@ -543,6 +550,10 @@ namespace PTA
                 if(entity.IsActive)
                 {
                     entity.Think(this, entity, dt);
+                    if(entity.EntityTypeID == EntityType.Enemy)
+                    {
+                        Debug.Assert(entity.IsHostile);
+                    }
                 }
             }
         }

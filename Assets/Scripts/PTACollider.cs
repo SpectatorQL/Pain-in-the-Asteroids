@@ -30,13 +30,14 @@ namespace PTA
                         {
                             PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.LTurretPosition);
                             Self.LTurretSlot = other;
+                            --World.WaveData.PowerupCount;
                         }
                         else if(Self.RTurretSlot == null)
                         {
                             PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.RTurretPosition);
                             Self.RTurretSlot = other;
+                            --World.WaveData.PowerupCount;
                         }
-                        --World.WaveData.PowerupCount;
                     }
                     else if(other.EntityTypeID == EntityType.Propulsion)
                     {
@@ -44,8 +45,8 @@ namespace PTA
                         {
                             PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.PropulsionPosition);
                             Self.PropulsionSlot = other;
+                            --World.WaveData.PowerupCount;
                         }
-                        --World.WaveData.PowerupCount;
                     }
 
                     else if(other.EntityTypeID == EntityType.Bullet)
@@ -53,7 +54,7 @@ namespace PTA
                         World.FreeEntities.Add(other);
                         
                         --Self.Data.Health;
-                        if(Self.Data.Health <= 0)
+                        if(Self.Data.Health == 0)
                         {
                             // TODO(SpectatorQL): Percent chance for detached entities to become enemies.
                             // TODO(SpectatorQL): Percent chance for detached entities to stay on the map.
@@ -85,8 +86,10 @@ namespace PTA
                             {
                                 --World.WaveData.EnemyCount;
                                 --World.WaveData.EnemiesOnScreen;
+                                Debug.Log($"Wave: {World.WaveData.CurrentWave}\n" +
+                                    $"Enemy Count: {World.WaveData.EnemyCount}\n" +
+                                    $"Enemies on screen: {World.WaveData.EnemiesOnScreen}");
                             }
-                            Debug.Log("You are dead. Not a big suprise.");
                         }
                     }
 
@@ -100,7 +103,7 @@ namespace PTA
                             World.FreeEntities.Add(other);
 
                             --Self.Data.Health;
-                            if(Self.Data.Health <= 0)
+                            if(Self.Data.Health == 0)
                             {
                                 World.FreeEntities.Add(Self.LTurretSlot);
                                 World.FreeEntities.Add(Self.RTurretSlot);
@@ -115,7 +118,7 @@ namespace PTA
                         && other.EntityTypeID == EntityType.Player)
                     {
                         --Self.Data.Health;
-                        if(Self.Data.Health <= 0)
+                        if(Self.Data.Health == 0)
                         {
                             // TODO(SpectatorQL): Percent chance for detached entities to become enemies.
                             // TODO(SpectatorQL): Percent chance for detached entities to stay on the map.
@@ -147,11 +150,13 @@ namespace PTA
                             {
                                 --World.WaveData.EnemyCount;
                                 --World.WaveData.EnemiesOnScreen;
+                                Debug.Log($"Wave: {World.WaveData.CurrentWave}\n" +
+                                    $"Enemy Count: {World.WaveData.EnemyCount}\n" +
+                                    $"Enemies on screen: {World.WaveData.EnemiesOnScreen}");
                             }
-                            Debug.Log("You are dead. Not a big surprise.");
                         }
                     }
-#if false
+#if true
                     else
                     {
                         Debug.Log($"Unknown collision occured!\nSelf: {Self.EntityTypeID}, Other: {other.EntityTypeID}");

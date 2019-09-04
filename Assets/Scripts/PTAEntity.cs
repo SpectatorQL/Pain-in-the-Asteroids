@@ -238,6 +238,8 @@ namespace PTA
                 {
                     entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 
+                    entity.Collider.BoxCollider.enabled = true;
+
                     entityMaterial.color = Color.white;
 
                     entity.Move = MoveFunctions.MoveStub;
