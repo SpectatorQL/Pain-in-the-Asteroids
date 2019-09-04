@@ -448,7 +448,7 @@ namespace PTA
                 Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount
                     && WaveData.EnemiesOnScreen >= 0);
                 // TODO(SpectatorQL): Do I want "rogue" detached entities to increment EnemiesOnScreen? I don't think I do but we'll see.
-                if(WaveData.EnemiesOnScreen < WaveData.MaxSpawnedEnemiesOnScreen
+                while(WaveData.EnemiesOnScreen < WaveData.MaxSpawnedEnemiesOnScreen
                     && WaveData.EnemiesOnScreen < WaveData.EnemyCount)
                 {
                     PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
@@ -462,7 +462,7 @@ namespace PTA
 #endif
                         hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         hostileEntity.Think = ThinkFunctions.HostileThink;
-                        
+
                         hostileEntity.Transform.position = GenerateEntityPosition();
 
                         hostileEntity.Collider.BoxCollider.enabled = false;
@@ -471,6 +471,10 @@ namespace PTA
                     ++WaveData.EnemiesOnScreen;
                     Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount);
                     Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.MaxSpawnedEnemiesOnScreen);
+                    Debug.Assert(WaveData.EnemiesOnScreen == Entities.Count(ent =>
+                    {
+                        return ent.EntityTypeID == EntityType.Enemy && ent.IsActive;
+                    }));
                 }
             }
             else
