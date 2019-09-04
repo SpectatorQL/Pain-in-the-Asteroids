@@ -175,6 +175,8 @@ namespace PTA
         {
             if(entity == null)
                 return;
+            if(!entity.IsActive)
+                return;
             
             entity.GameObject.SetActive(false);
             entity.IsActive = false;
