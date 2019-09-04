@@ -182,57 +182,6 @@ namespace PTA
             entity.IsActive = false;
             ++Top;
             Entities[Top] = entity;
-
-            for(int i = 0;
-                i < Top;
-                ++i)
-            {
-                uint selfID = Entities[i].EntityID;
-                uint appeared = 0;
-                for(int j = 0;
-                    j < Top;
-                    ++j)
-                {
-                    uint otherID = Entities[j].EntityID;
-                    if(selfID == otherID)
-                    {
-                        ++appeared;
-                    }
-                }
-
-                if(appeared > 1)
-                {
-                    Debug.Assert(false, "Enitity has been freed more than once!");
-                    PTAEntity[] sortedEntities = new PTAEntity[Top];
-                    Array.Copy(Entities, sortedEntities, Top);
-                    Array.Sort(sortedEntities, (self, other) =>
-                    {
-                        int result;
-                        if(self.EntityID > other.EntityID)
-                        {
-                            result = 1;
-                        }
-                        else if(self.EntityID == other.EntityID)
-                        {
-                            result = 0;
-                        }
-                        else
-                        {
-                            result = -1;
-                        }
-                        return result;
-                    });
-
-                    string printf = "";
-                    for(int j = 0;
-                        j < Top;
-                        ++j)
-                    {
-                        printf += $"Entity {j}: ID = {sortedEntities[j].EntityID}\n";
-                    }
-                    Debug.LogWarning(printf);
-                }
-            }
         }
         
         public PTAEntity GetNext()
@@ -508,11 +457,7 @@ namespace PTA
                     if(hostileEntity != null)
                     {
                         hostileEntity.IsHostile = true;
-#if true
-                        hostileEntity.Move = MoveFunctions.MoveStub;
-#else
                         hostileEntity.Move = MoveFunctions.LinearMove;
-#endif
                         hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         hostileEntity.Think = ThinkFunctions.HostileThink;
 
@@ -537,28 +482,6 @@ namespace PTA
                 {
                     int newEnemyCount = nextWave;
                     WaveData.EnemyCount = newEnemyCount;
-#if false
-                    int newEnemies = (newEnemyCount < WaveData.MaxSpawnedEnemiesOnScreen) ? newEnemyCount : WaveData.MaxSpawnedEnemiesOnScreen;
-                    WaveData.EnemiesOnScreen = newEnemies;
-                    Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount);
-                    while(newEnemies > 0)
-                    {
-                        PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
-                        if(hostileEntity != null)
-                        {
-                            hostileEntity.IsHostile = true;
-                            hostileEntity.Move = MoveFunctions.LinearMove;
-                            hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
-                            hostileEntity.Think = ThinkFunctions.HostileThink;
-                            
-                            hostileEntity.Transform.position = GenerateEntityPosition();
-
-                            hostileEntity.Collider.BoxCollider.enabled = false;
-                        }
-
-                        --newEnemies;
-                    }
-#endif
                     
                     if(nextWave % 5 == 0
                         && WaveData.PowerupWaitTime < WaveData.MinPowerupWaitTime)
@@ -577,7 +500,7 @@ namespace PTA
                     Debug.Log("YOU WIN!!!");
                 }
             }
-#if false
+
             if(WaveData.PowerupCount < WaveData.MaxPowerupsOnScreen)
             {
                 if(WaveData.RunningPowerupTime < 0)
@@ -596,7 +519,6 @@ namespace PTA
                 }
             }
             WaveData.RunningPowerupTime -= dt;
-#endif
 
 
             for(int i = 0;
@@ -607,10 +529,6 @@ namespace PTA
                 if(entity.IsActive)
                 {
                     entity.Think(this, entity, dt);
-                    if(entity.EntityTypeID == EntityType.Enemy)
-                    {
-                        Debug.Assert(entity.IsHostile);
-                    }
                 }
             }
         }

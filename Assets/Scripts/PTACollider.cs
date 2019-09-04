@@ -86,9 +86,6 @@ namespace PTA
                             {
                                 --World.WaveData.EnemyCount;
                                 --World.WaveData.EnemiesOnScreen;
-                                Debug.Log($"Wave: {World.WaveData.CurrentWave}\n" +
-                                    $"Enemy Count: {World.WaveData.EnemyCount}\n" +
-                                    $"Enemies on screen: {World.WaveData.EnemiesOnScreen}");
                             }
                         }
                     }
@@ -150,13 +147,10 @@ namespace PTA
                             {
                                 --World.WaveData.EnemyCount;
                                 --World.WaveData.EnemiesOnScreen;
-                                Debug.Log($"Wave: {World.WaveData.CurrentWave}\n" +
-                                    $"Enemy Count: {World.WaveData.EnemyCount}\n" +
-                                    $"Enemies on screen: {World.WaveData.EnemiesOnScreen}");
                             }
                         }
                     }
-#if true
+#if false
                     else
                     {
                         Debug.Log($"Unknown collision occured!\nSelf: {Self.EntityTypeID}, Other: {other.EntityTypeID}");
