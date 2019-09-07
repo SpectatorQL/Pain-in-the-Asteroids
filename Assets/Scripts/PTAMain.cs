@@ -498,7 +498,7 @@ namespace PTA
                     WaveData.EnemyCount = newEnemyCount;
                     
                     if(nextWave % 5 == 0
-                        && WaveData.PowerupWaitTime < WaveData.MinPowerupWaitTime)
+                        && WaveData.PowerupWaitTime > WaveData.MinPowerupWaitTime)
                     {
                         WaveData.PowerupWaitTime -= 0.5f;
                     }
