@@ -63,15 +63,13 @@ namespace PTA
 
         public Move Move;
         public Think Think;
-
-        public PTAEntity BodySlot;
+        
         public PTAEntity LTurretSlot;
         public PTAEntity RTurretSlot;
         public PTAEntity PropulsionSlot;
 
         public static void AttachEntity(PTAEntity entity, PTAEntity newParent, Vector3 alignPoint)
         {
-            entity.BodySlot = null;
             entity.Collider.BoxCollider.enabled = false;
 
             entity.Transform.parent = newParent.Transform;
@@ -85,7 +83,6 @@ namespace PTA
         public static void DetachEntity(PTAEntity entity)
         {
             entity.Transform.parent = null;
-            entity.BodySlot = entity;
             entity.Collider.BoxCollider.enabled = true;
         }
 
@@ -292,8 +289,6 @@ namespace PTA
             entity.Collider.BoxCollider = entityObject.GetComponent<BoxCollider2D>();
             entity.Collider.Self = entity;
             entity.Collider.World = world;
-
-            entity.BodySlot = entity;
 
             entity.Move = MoveFunctions.MoveStub;
             entity.Think = ThinkFunctions.ThinkStub;
