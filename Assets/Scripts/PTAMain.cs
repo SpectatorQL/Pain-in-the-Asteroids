@@ -27,8 +27,7 @@ namespace PTA
         
         public static void SineMove(PTAEntity entity)
         {
-            if(entity.EntityTypeID == EntityType.Enemy
-                && !entity.Spawned)
+            if(!entity.HasSpawned)
                 return;
 
             entity.Rigidbody.velocity = Vector2.zero;
@@ -59,8 +58,7 @@ namespace PTA
         
         public static void LinearMove(PTAEntity entity)
         {
-            if(entity.EntityTypeID == EntityType.Enemy
-                && !entity.Spawned)
+            if(!entity.HasSpawned)
                 return;
 
             entity.Rigidbody.velocity = Vector2.zero;
@@ -108,7 +106,7 @@ namespace PTA
                 entity.Renderer.material.color = fadingEntityColor;
 
                 entity.Collider.BoxCollider.enabled = true;
-                entity.Spawned = true;
+                entity.HasSpawned = true;
             }
         }
         
@@ -471,6 +469,8 @@ namespace PTA
                     if(hostileEntity != null)
                     {
                         hostileEntity.IsHostile = true;
+                        hostileEntity.HasSpawned = false;
+
                         hostileEntity.Move = MoveFunctions.SineMove;
                         hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         hostileEntity.Think = ThinkFunctions.HostileThink;

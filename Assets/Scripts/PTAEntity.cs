@@ -51,7 +51,7 @@ namespace PTA
         public EnemyType EnemyTypeID;
         public bool IsActive;
         public bool IsHostile;
-        public bool Spawned;
+        public bool HasSpawned;
 
         // TODO(SpectatorQL): Figure out whether we really need all of the stuff that's in a GameObject!
         // NOTE(SpectatorQL): We can't get rid of this because of SetActive() and layer.
@@ -169,8 +169,6 @@ namespace PTA
                     entity.GameObject.layer = ThingsLayer;
                     entity.Transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
 
-                    entity.Spawned = false;
-
                     EntityData entityData = new EntityData();
                     EnemyType enemyType = DetermineEnemyType(world);
                     switch(enemyType)
@@ -264,6 +262,7 @@ namespace PTA
 
             entity.EntityTypeID = entityType;
             entity.IsHostile = false;
+            entity.HasSpawned = true;
 
             entity.Renderer.sprite = world.Sprites[(int)entityType];
 
