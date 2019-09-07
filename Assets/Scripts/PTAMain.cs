@@ -32,7 +32,9 @@ namespace PTA
                 return;
 
             entity.Rigidbody.velocity = Vector2.zero;
-            
+
+            Vector2 entityPosition = entity.Transform.position;
+
             Vector2 newPosition = entity.Transform.position;
             
             newPosition.x += entity.Data.MovementSpeed;
@@ -40,9 +42,14 @@ namespace PTA
             float sineRange = 0.10f;
             sineValue = Mathf.Clamp(sineValue, -sineRange, sineRange);
             newPosition.y += sineValue;
-            
+
             entity.Rigidbody.MovePosition(newPosition);
-            
+
+            float rotationAngle = Mathf.Atan2(newPosition.y - entityPosition.y, newPosition.x - entityPosition.x) * Mathf.Rad2Deg;
+            Vector3 eulers = entity.Transform.eulerAngles;
+            eulers.z = rotationAngle;
+            entity.Transform.eulerAngles = eulers;
+
             if(entity.Data.TSine > (2.0f * Mathf.PI))
             {
                 entity.Data.TSine -= (2.0f * Mathf.PI);
@@ -57,9 +64,16 @@ namespace PTA
                 return;
 
             entity.Rigidbody.velocity = Vector2.zero;
-            
-            Vector2 newPosition = (Vector2)entity.Transform.position + entity.Data.MoveDirection.normalized * entity.Data.MovementSpeed;
+
+            Vector2 entityPosition = entity.Transform.position;
+
+            Vector2 newPosition = entityPosition + entity.Data.MoveDirection.normalized * entity.Data.MovementSpeed;
             entity.Rigidbody.MovePosition(newPosition);
+
+            float rotationAngle = Mathf.Atan2(newPosition.y - entityPosition.y, newPosition.x - entityPosition.x) * Mathf.Rad2Deg;
+            Vector3 eulers = entity.Transform.eulerAngles;
+            eulers.z = rotationAngle;
+            entity.Transform.eulerAngles = eulers;
         }
     }
     
@@ -457,7 +471,7 @@ namespace PTA
                     if(hostileEntity != null)
                     {
                         hostileEntity.IsHostile = true;
-                        hostileEntity.Move = MoveFunctions.LinearMove;
+                        hostileEntity.Move = MoveFunctions.SineMove;
                         hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         hostileEntity.Think = ThinkFunctions.HostileThink;
 

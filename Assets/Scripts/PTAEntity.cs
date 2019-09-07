@@ -263,6 +263,8 @@ namespace PTA
                 }
             }
 
+            entity.Transform.rotation = Quaternion.identity;
+
             entity.EntityTypeID = entityType;
             entity.IsHostile = false;
 
