@@ -213,43 +213,16 @@ namespace PTA
             return result;
         }
     }
-
-    /*
-        NOTE(SpectatorQL): 
-
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
     
-        Apparently, Unity DOES NOT issue a full recompile when you change a static/const/enum variable
-        that was used to initialize an array inline. It just keeps the old array FOREVER, NO MATTER WHAT YOU DO.
-        So now if I want to make an editor window to set values in the enemy probability array
-        I either have to delete and re-add the Serializable attribute, losing all the data in the process
-        or I have to MANUALLY save the array to a file and read from it whenever I want to change something...
-
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-        UNITY IS DOGSHIT
-    */
-    // BIIIIIG TODO(SpectatorQL): A workaround...
+    [Serializable]
     public class PTAEnemyProbability
     {
         public float[] Values;
         public const float PROBABILITY_TOTAL = 1.0f;
+#if UNITY_EDITOR
+        public int WaveCount;
+        public int EnemyTypeCount;
+#endif
     }
     
     public class PTAWaveData
@@ -266,7 +239,6 @@ namespace PTA
 
         public int CurrentWave;
         public int MaxWave = 9;
-        public const int MAX_WAVE = 9;
     }
     
     public class PTAMain : MonoBehaviour
@@ -388,10 +360,6 @@ namespace PTA
                     }
                 }
             }
-
-
-            EnemyProbability = new PTAEnemyProbability();
-            EnemyProbability.Values = new float[WaveData.MaxWave * (int)EnemyType.Count];
 
 
             Entities = new PTAEntity[ENTITY_COUNT];

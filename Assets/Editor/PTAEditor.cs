@@ -64,20 +64,123 @@ namespace PTA
             }
             wnd.Show();
         }
+
+        void UpdateProbabilityOnSerializationChanges(PTAEnemyProbability enemyProbability, int waveCount, int enemyTypeCount)
+        {
+            int oldWaveCount = enemyProbability.WaveCount;
+            int oldEnemyTypeCount = enemyProbability.EnemyTypeCount;
+            float[] oldProbValues = enemyProbability.Values;
+
+            if(oldWaveCount < waveCount)
+            {
+                float[] newProbValues = new float[waveCount * enemyTypeCount];
+                for(int i = 0;
+                    i < oldWaveCount * enemyTypeCount;
+                    ++i)
+                {
+                    newProbValues[i] = oldProbValues[i];
+                }
+
+                for(int i = oldWaveCount;
+                    i < waveCount;
+                    ++i)
+                {
+                    for(int j = 0;
+                        j < enemyTypeCount;
+                        ++j)
+                    {
+                        int index = i * enemyTypeCount + j;
+                        newProbValues[index] = 0.0f;
+                    }
+                }
+
+                enemyProbability.WaveCount = waveCount;
+                enemyProbability.EnemyTypeCount = enemyTypeCount;
+                enemyProbability.Values = newProbValues;
+            }
+            else if(oldWaveCount > waveCount)
+            {
+                float[] newProbValues = new float[waveCount * enemyTypeCount];
+                for(int i = 0;
+                    i < newProbValues.Length;
+                    ++i)
+                {
+                    newProbValues[i] = oldProbValues[i];
+                }
+
+                enemyProbability.WaveCount = waveCount;
+                enemyProbability.EnemyTypeCount = enemyTypeCount;
+                enemyProbability.Values = newProbValues;
+            }
+
+            if(oldEnemyTypeCount < enemyTypeCount)
+            {
+                float[] newProbValues = new float[waveCount * enemyTypeCount];
+                for(int i = 0;
+                    i < waveCount;
+                    ++i)
+                {
+                    for(int j = 0;
+                        j < oldEnemyTypeCount;
+                        ++j)
+                    {
+                        int index = i * oldEnemyTypeCount + j;
+                        newProbValues[index] = oldProbValues[index];
+                    }
+                }
+
+                enemyProbability.WaveCount = waveCount;
+                enemyProbability.EnemyTypeCount = enemyTypeCount;
+                enemyProbability.Values = newProbValues;
+            }
+            else if(oldEnemyTypeCount > enemyTypeCount)
+            {
+                float[] newProbValues = new float[waveCount * enemyTypeCount];
+                for(int i = 0;
+                    i < waveCount;
+                    ++i)
+                {
+                    for(int j = 0;
+                        j < enemyTypeCount;
+                        ++j)
+                    {
+                        int oldValueIndex = i * oldEnemyTypeCount + j;
+                        int newValueIndex = i * enemyTypeCount + j;
+                        newProbValues[newValueIndex] = oldProbValues[oldValueIndex];
+                    }
+                }
+
+                enemyProbability.WaveCount = waveCount;
+                enemyProbability.EnemyTypeCount = enemyTypeCount;
+                enemyProbability.Values = newProbValues;
+            }
+        }
+
         // NOTE(SpectatorQL): I know I could've used EditorGUILayout versions of these, I know, I'm dumb.
         // TODO(SpectatorQL): Sane way of doing this kind of stuff !!!
         void OnGUI()
         {
+            int waveCount = World.WaveData.MaxWave;
+            int enemyTypeCount = (int)EnemyType.Count;
+
+            if((World.EnemyProbability.Values == null) || (World.EnemyProbability.Values.Length == 0))
+            {
+                World.EnemyProbability.Values = new float[waveCount * enemyTypeCount];
+            }
+
+            UpdateProbabilityOnSerializationChanges(World.EnemyProbability, waveCount, enemyTypeCount);
+
+
             float firstRowHeight = 24;
             
             Rect waveLabelRect = new Rect(0, 0, 80, firstRowHeight);
-            EditorGUI.LabelField(waveLabelRect, $"Wave ({0}-{PTAWaveData.MAX_WAVE - 1})");
+            EditorGUI.LabelField(waveLabelRect, $"Wave ({0}-{waveCount - 1})");
             
             Rect waveFieldRect = new Rect(waveLabelRect.width, 0, 32, firstRowHeight);
             Wave = EditorGUI.IntField(waveFieldRect, Wave);
-            if(Wave >= PTAWaveData.MAX_WAVE)
+            if(Wave >= waveCount)
             {
-                Wave = PTAWaveData.MAX_WAVE - 1;
+                Wave = waveCount - 1;
             }
             else if(Wave < 0)
             {
@@ -112,8 +215,7 @@ namespace PTA
             
             Rect viewRect = new Rect(0, firstRowHeight, position.width, position.height - firstRowHeight);
             EditorGUI.DrawRect(viewRect, Color.gray);
-
-            int enemyTypeCount = (int)EnemyType.Count;
+            
             string[] enemyTypeNames = Enum.GetNames(typeof(EnemyType));
             float[] probValues = World.EnemyProbability.Values;
             if(DisplayedView == View.Wave)
@@ -136,7 +238,7 @@ namespace PTA
                     EditorGUI.LabelField(new Rect(enemyTypeLabelX, enemyTypeLabelY, enemyTypeLabelWidth, rowHeight), $"{enemyTypeNames[i]}");
 
                     int currentProbIndex = Wave * enemyTypeCount + i;
-                    Debug.Assert(currentProbIndex < World.EnemyProbability.Values.Length);
+                    Debug.Assert(currentProbIndex < probValues.Length);
                     float prob = probValues[currentProbIndex];
                     prob = EditorGUI.Slider(new Rect(sliderX, sliderY, sliderWidth, rowHeight),
                                             prob,
@@ -149,7 +251,7 @@ namespace PTA
                             ++j)
                         {
                             int probIndex = Wave * enemyTypeCount + j;
-                            Debug.Assert(probIndex < World.EnemyProbability.Values.Length);
+                            Debug.Assert(probIndex < probValues.Length);
                             probSum += probValues[probIndex];
                         }
 
@@ -176,8 +278,7 @@ namespace PTA
                 float waveChunkWidth = 32.0f;
                 float graphRectWidth = 0.0f;
                 float graphRectHeight = viewRect.height;
-
-                int waveCount = PTAWaveData.MAX_WAVE;
+                
                 Vector2[] waveChunkPositions = new Vector2[waveCount];
                 Vector2[] waveChunkSizes = new Vector2[waveCount];
                 for(int i = 0;
