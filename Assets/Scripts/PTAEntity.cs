@@ -29,6 +29,8 @@ namespace PTA
 
         Bullet,
 
+        RogueEnemy,
+
         Count
     }
 
@@ -131,6 +133,18 @@ namespace PTA
         public static int PlayerLayer;
         public static int ThingsLayer;
 
+        public static PTAEntity MakeRogue(PTAMain world, PTAEntity entity)
+        {
+            entity.Move = MoveFunctions.MoveStub;
+            entity.Think = ThinkFunctions.RogueThink;
+
+            entity.EntityTypeID = EntityType.RogueEnemy;
+            entity.Data.Health = 1;
+            entity.Data.MovementSpeed = 0.08f;
+
+            return entity;
+        }
+        
         public static PTAEntity CreateEntity(PTAMain world, EntityType entityType)
         {
             PTAEntity entity = world.FreeEntities.GetNext();

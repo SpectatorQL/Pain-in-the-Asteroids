@@ -11,57 +11,54 @@ namespace PTA
         
         public PTAMain World;
         
+        void DetermineEntityFate(PTAEntity entity)
+        {
+            float spawnChance = Random.value;
+            if(spawnChance < World.WaveData.PowerupStayChance)
+            {
+                World.FreeEntities.Add(entity);
+            }
+            else
+            {
+                spawnChance = Random.value;
+                if(spawnChance < World.WaveData.RogueEnemySpawnChance)
+                {
+                    World.FreeEntities.Add(entity);
+                }
+                else
+                {
+                    PTAEntity.MakeRogue(World, entity);
+                }
+            }
+        }
+
         void DetachEntitiesOnDeath(PTAEntity entity)
         {
             // NOTE(SpectatorQL): I would really like to put these in a union and just loop through an array, but oh well.
             PTAEntity lTurret = Self.LTurretSlot;
             PTAEntity rTurret = Self.RTurretSlot;
             PTAEntity propulsion = Self.PropulsionSlot;
-            float spawnChance;
 
             if(lTurret != null)
             {
                 PTAEntity.DetachEntity(lTurret);
                 Self.LTurretSlot = null;
 
-                spawnChance = Random.value;
-                if(spawnChance < World.WaveData.PowerupStayChance)
-                {
-                    World.FreeEntities.Add(lTurret);
-                }
-
-                spawnChance = Random.value;
-                // TODO(SpectatorQL): Actually implement this functionality.
-                if(spawnChance < World.WaveData.RogueEnemySpawnChance)
-                {
-                    World.FreeEntities.Add(lTurret);
-                }
-                else
-                {
-                    World.FreeEntities.Add(lTurret);
-                }
+                DetermineEntityFate(lTurret);
             }
             if(rTurret != null)
             {
                 PTAEntity.DetachEntity(rTurret);
                 Self.RTurretSlot = null;
 
-                spawnChance = Random.value;
-                if(spawnChance < World.WaveData.PowerupStayChance)
-                {
-                    World.FreeEntities.Add(rTurret);
-                }
+                DetermineEntityFate(rTurret);
             }
             if(propulsion != null)
             {
                 PTAEntity.DetachEntity(propulsion);
                 Self.PropulsionSlot = null;
 
-                spawnChance = Random.value;
-                if(spawnChance < World.WaveData.PowerupStayChance)
-                {
-                    World.FreeEntities.Add(propulsion);
-                }
+                DetermineEntityFate(propulsion);
             }
         }
 
@@ -76,7 +73,8 @@ namespace PTA
             {
                 PTAEntity other = collider.Self;
                 if(Self.EntityTypeID == EntityType.Player
-                   || Self.EntityTypeID == EntityType.Enemy)
+                   || Self.EntityTypeID == EntityType.Enemy
+                   || Self.EntityTypeID == EntityType.RogueEnemy)
                 {
                     if(other.EntityTypeID == EntityType.Turret)
                     {
@@ -142,6 +140,27 @@ namespace PTA
                         }
                     }
 
+                    else if(Self.EntityTypeID == EntityType.Player
+                        && other.EntityTypeID == EntityType.RogueEnemy)
+                    {
+                        if(!World.Invincibility)
+                        {
+                            World.StartCoroutine(World.TemporaryInvincibility());
+
+                            World.FreeEntities.Add(other);
+
+                            --Self.Data.Health;
+                            if(Self.Data.Health == 0)
+                            {
+                                World.FreeEntities.Add(Self.LTurretSlot);
+                                World.FreeEntities.Add(Self.RTurretSlot);
+                                World.FreeEntities.Add(Self.PropulsionSlot);
+                                World.FreeEntities.Add(Self);
+                                Debug.Log("Guess I'll die.");
+                            }
+                        }
+                    }
+
                     else if(Self.EntityTypeID == EntityType.Enemy
                         && other.EntityTypeID == EntityType.Player)
                     {
@@ -156,6 +175,17 @@ namespace PTA
                                 --World.WaveData.EnemyCount;
                                 --World.WaveData.EnemiesOnScreen;
                             }
+                        }
+                    }
+
+                    else if(Self.EntityTypeID == EntityType.RogueEnemy
+                        && other.EntityTypeID == EntityType.Player)
+                    {
+                        --Self.Data.Health;
+                        if(Self.Data.Health == 0)
+                        {
+                            DetachEntitiesOnDeath(Self);
+                            World.FreeEntities.Add(Self);
                         }
                     }
 #if false

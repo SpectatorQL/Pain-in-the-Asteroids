@@ -109,6 +109,22 @@ namespace PTA
                 entity.HasSpawned = true;
             }
         }
+
+        public static void RogueThink(PTAMain world, PTAEntity entity, float dt)
+        {
+            entity.Rigidbody.velocity = Vector2.zero;
+
+            Vector2 entityPosition = entity.Transform.position;
+
+            Vector2 direction = (Vector2)world.PlayerEntity.Transform.position - entityPosition;
+            Vector2 newPosition = entityPosition + direction.normalized * entity.Data.MovementSpeed;
+            entity.Rigidbody.MovePosition(newPosition);
+
+            float rotationAngle = Mathf.Atan2(newPosition.y - entityPosition.y, newPosition.x - entityPosition.x) * Mathf.Rad2Deg;
+            Vector3 eulers = entity.Transform.eulerAngles;
+            eulers.z = rotationAngle;
+            entity.Transform.eulerAngles = eulers;
+        }
         
         public static void PlayerThink(PTAMain world, PTAEntity entity, float dt)
         {
