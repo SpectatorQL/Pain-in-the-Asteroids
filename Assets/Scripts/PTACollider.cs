@@ -11,6 +11,60 @@ namespace PTA
         
         public PTAMain World;
         
+        void DetachEntitiesOnDeath(PTAEntity entity)
+        {
+            // NOTE(SpectatorQL): I would really like to put these in a union and just loop through an array, but oh well.
+            PTAEntity lTurret = Self.LTurretSlot;
+            PTAEntity rTurret = Self.RTurretSlot;
+            PTAEntity propulsion = Self.PropulsionSlot;
+            float spawnChance;
+
+            if(lTurret != null)
+            {
+                PTAEntity.DetachEntity(lTurret);
+                Self.LTurretSlot = null;
+
+                spawnChance = Random.value;
+                if(spawnChance < World.WaveData.PowerupStayChance)
+                {
+                    World.FreeEntities.Add(lTurret);
+                }
+
+                spawnChance = Random.value;
+                // TODO(SpectatorQL): Actually implement this functionality.
+                if(spawnChance < World.WaveData.RogueEnemySpawnChance)
+                {
+                    World.FreeEntities.Add(lTurret);
+                }
+                else
+                {
+                    World.FreeEntities.Add(lTurret);
+                }
+            }
+            if(rTurret != null)
+            {
+                PTAEntity.DetachEntity(rTurret);
+                Self.RTurretSlot = null;
+
+                spawnChance = Random.value;
+                if(spawnChance < World.WaveData.PowerupStayChance)
+                {
+                    World.FreeEntities.Add(rTurret);
+                }
+            }
+            if(propulsion != null)
+            {
+                PTAEntity.DetachEntity(propulsion);
+                Self.PropulsionSlot = null;
+
+                spawnChance = Random.value;
+                if(spawnChance < World.WaveData.PowerupStayChance)
+                {
+                    World.FreeEntities.Add(propulsion);
+                }
+            }
+        }
+
         // NOTE(SpectatorQL): Some day I need to learn how to handle a mess like this...
         // Like, where does this code _actually_ belong? What should it _actually_ do?
         // Create messages for the world to process? Act immediately, like I do here?
@@ -56,30 +110,7 @@ namespace PTA
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
                         {
-                            // TODO(SpectatorQL): Percent chance for detached entities to become enemies.
-                            // TODO(SpectatorQL): Percent chance for detached entities to stay on the map.
-                            PTAEntity lTurret = Self.LTurretSlot;
-                            PTAEntity rTurret = Self.RTurretSlot;
-                            PTAEntity propulsion = Self.PropulsionSlot;
-                            if(lTurret != null)
-                            {
-                                PTAEntity.DetachEntity(lTurret);
-                                World.FreeEntities.Add(lTurret);
-                                Self.LTurretSlot = null;
-                            }
-                            if(rTurret != null)
-                            {
-                                PTAEntity.DetachEntity(rTurret);
-                                World.FreeEntities.Add(rTurret);
-                                Self.RTurretSlot = null;
-                            }
-                            if(propulsion != null)
-                            {
-                                PTAEntity.DetachEntity(propulsion);
-                                World.FreeEntities.Add(propulsion);
-                                Self.PropulsionSlot = null;
-                            }
-                            
+                            DetachEntitiesOnDeath(Self);
                             World.FreeEntities.Add(Self);
 
                             if(Self.IsHostile)
@@ -117,30 +148,7 @@ namespace PTA
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
                         {
-                            // TODO(SpectatorQL): Percent chance for detached entities to become enemies.
-                            // TODO(SpectatorQL): Percent chance for detached entities to stay on the map.
-                            PTAEntity lTurret = Self.LTurretSlot;
-                            PTAEntity rTurret = Self.RTurretSlot;
-                            PTAEntity propulsion = Self.PropulsionSlot;
-                            if(lTurret != null)
-                            {
-                                PTAEntity.DetachEntity(lTurret);
-                                World.FreeEntities.Add(lTurret);
-                                Self.LTurretSlot = null;
-                            }
-                            if(rTurret != null)
-                            {
-                                PTAEntity.DetachEntity(rTurret);
-                                World.FreeEntities.Add(rTurret);
-                                Self.RTurretSlot = null;
-                            }
-                            if(propulsion != null)
-                            {
-                                PTAEntity.DetachEntity(propulsion);
-                                World.FreeEntities.Add(propulsion);
-                                Self.PropulsionSlot = null;
-                            }
-
+                            DetachEntitiesOnDeath(Self);
                             World.FreeEntities.Add(Self);
 
                             if(Self.IsHostile)

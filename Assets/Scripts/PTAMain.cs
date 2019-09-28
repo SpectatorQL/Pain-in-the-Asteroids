@@ -239,6 +239,9 @@ namespace PTA
 
         public int CurrentWave;
         public int MaxWave = 9;
+
+        public float PowerupStayChance;
+        public float RogueEnemySpawnChance;
     }
     
     public class PTAMain : MonoBehaviour
