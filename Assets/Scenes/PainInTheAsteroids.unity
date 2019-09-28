@@ -227,32 +227,49 @@ MonoBehaviour:
       RunningAttackSpeed: 0
       MovementSpeed: 0
       TSine: 0
+      TimeToSpawn: 0
+    EntityID: 0
     EntityTypeID: 0
     EnemyTypeID: 0
     IsActive: 0
     IsHostile: 0
-    Spawned: 0
+    HasSpawned: 0
     GameObject: {fileID: 0}
     Transform: {fileID: 0}
     Rigidbody: {fileID: 0}
     Renderer: {fileID: 0}
     Collider: {fileID: 0}
-  HostileEntities: 0
-  CurrentWave: 0
   EnemyProbability:
     Values:
-    - 0.79999995
-    - 0.2
     - 0
-    - 0.4
-    - 0.4
-    - 0.19999999
-    - 0.3
-    - 0.3
-    - 0.39999998
-    - 0.1
-    - 0.29999995
-    - 0.6
+    - 0.534
+    - 0.466
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    WaveCount: 9
+    EnemyTypeCount: 3
   EntityPrefab: {fileID: 1328843021801454, guid: a3865ed1922c778459978a2f893ea9d8,
     type: 2}
   WallPrefab: {fileID: 1735661248746848, guid: 708a6e8399554264ca99c6c69bdb0798, type: 2}
