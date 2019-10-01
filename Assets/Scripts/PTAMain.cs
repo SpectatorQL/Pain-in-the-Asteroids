@@ -258,7 +258,15 @@ namespace PTA
         public int WildPowerupCount;
         public float WildPowerupSpawnChance;
     }
-    
+
+    [Serializable]
+    public struct PTACheatCodes
+    {
+        public bool Invincibility;
+        public bool RapidFire;
+        public float RapidFireSpeed;
+    }
+
     public class PTAMain : MonoBehaviour
     {
         public const int ENTITY_COUNT = 4096;
@@ -275,8 +283,8 @@ namespace PTA
         public GameObject WallPrefab;
         
         public PTAAlignment EntityAlignment;
-        
-        public bool Invincibility;
+
+        public PTACheatCodes Cheats;
 
         struct PlayAreaDimensions
         {
@@ -409,7 +417,8 @@ namespace PTA
             drive.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
 #else
-            Invincibility = false;
+            Cheats.Invincibility = false;
+            Cheats.RapidFire = false;
 #endif
 
             UI = FindObjectOfType<PTAUI>();
@@ -432,10 +441,10 @@ namespace PTA
 
         public IEnumerator TemporaryInvincibility()
         {
-            Invincibility = true;
+            Cheats.Invincibility = true;
             yield return new WaitForSeconds(2.0f);
 
-            Invincibility = false;
+            Cheats.Invincibility = false;
             yield return null;
         }
 
@@ -541,6 +550,12 @@ namespace PTA
             if(WaveData.RunningPowerupTime > 0)
             {
                 WaveData.RunningPowerupTime -= dt;
+            }
+
+
+            if(Cheats.RapidFire)
+            {
+                PlayerEntity.Data.AttackSpeed = Cheats.RapidFireSpeed;
             }
 
 

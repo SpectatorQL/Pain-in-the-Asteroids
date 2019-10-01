@@ -123,7 +123,7 @@ namespace PTA
 
                     else if(other.EntityTypeID == EntityType.Enemy)
                     {
-                        if(!World.Invincibility)
+                        if(!World.Cheats.Invincibility)
                         {
                             World.StartCoroutine(World.TemporaryInvincibility());
 
@@ -143,7 +143,7 @@ namespace PTA
 
                     else if(other.EntityTypeID == EntityType.WildPowerup)
                     {
-                        if(!World.Invincibility)
+                        if(!World.Cheats.Invincibility)
                         {
                             World.StartCoroutine(World.TemporaryInvincibility());
 

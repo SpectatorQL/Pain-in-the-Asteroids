@@ -274,7 +274,10 @@ MonoBehaviour:
     type: 2}
   WallPrefab: {fileID: 1735661248746848, guid: 708a6e8399554264ca99c6c69bdb0798, type: 2}
   EntityAlignment: {fileID: 351888369}
-  Invincibility: 1
+  Cheats:
+    Invincibility: 1
+    RapidFire: 1
+    RapidFireSpeed: 0.07
   Sprites:
   - {fileID: 0}
   - {fileID: 21300000, guid: 1a138e239f3a27a42b4353aea1f8c3a5, type: 3}
