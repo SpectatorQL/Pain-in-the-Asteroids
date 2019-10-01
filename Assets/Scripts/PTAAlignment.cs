@@ -10,7 +10,7 @@ namespace PTA
     {
         public Vector2 LTurretPosition;
         public Vector2 RTurretPosition;
-        public Vector2 PropulsionPosition;
+        public Vector2 DrivePosition;
     }
     
     public class PTAAlignment : MonoBehaviour
@@ -51,7 +51,7 @@ namespace PTA
 
                     Gizmos.DrawCube(rotatedLTurret, size);
                     Gizmos.DrawCube(entityOrigin + Points.RTurretPosition, size);
-                    Gizmos.DrawCube(entityOrigin + Points.PropulsionPosition, size);
+                    Gizmos.DrawCube(entityOrigin + Points.DrivePosition, size);
                 }
             }
         }

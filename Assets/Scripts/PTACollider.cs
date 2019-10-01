@@ -37,7 +37,7 @@ namespace PTA
             // NOTE(SpectatorQL): I would really like to put these in a union and just loop through an array, but oh well.
             PTAEntity lTurret = Self.LTurretSlot;
             PTAEntity rTurret = Self.RTurretSlot;
-            PTAEntity propulsion = Self.PropulsionSlot;
+            PTAEntity drive = Self.DriveSlot;
 
             if(lTurret != null)
             {
@@ -53,12 +53,12 @@ namespace PTA
 
                 DetermineEntityFate(rTurret);
             }
-            if(propulsion != null)
+            if(drive != null)
             {
-                PTAEntity.DetachEntity(propulsion);
-                Self.PropulsionSlot = null;
+                PTAEntity.DetachEntity(drive);
+                Self.DriveSlot = null;
 
-                DetermineEntityFate(propulsion);
+                DetermineEntityFate(drive);
             }
         }
 
@@ -93,12 +93,12 @@ namespace PTA
                                 --World.WaveData.PowerupCount;
                             }
                         }
-                        else if(other.PowerupTypeID == PowerupType.Propulsion)
+                        else if(other.PowerupTypeID == PowerupType.Drive)
                         {
-                            if(Self.PropulsionSlot == null)
+                            if(Self.DriveSlot == null)
                             {
-                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.PropulsionPosition);
-                                Self.PropulsionSlot = other;
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.DrivePosition);
+                                Self.DriveSlot = other;
                                 --World.WaveData.PowerupCount;
                             }
                         }
@@ -136,7 +136,7 @@ namespace PTA
                             {
                                 World.FreeEntities.Add(Self.LTurretSlot);
                                 World.FreeEntities.Add(Self.RTurretSlot);
-                                World.FreeEntities.Add(Self.PropulsionSlot);
+                                World.FreeEntities.Add(Self.DriveSlot);
                                 World.FreeEntities.Add(Self);
                                 Debug.Log("Guess I'll die.");
                             }
@@ -157,7 +157,7 @@ namespace PTA
                             {
                                 World.FreeEntities.Add(Self.LTurretSlot);
                                 World.FreeEntities.Add(Self.RTurretSlot);
-                                World.FreeEntities.Add(Self.PropulsionSlot);
+                                World.FreeEntities.Add(Self.DriveSlot);
                                 World.FreeEntities.Add(Self);
                                 Debug.Log("Guess I'll die.");
                             }

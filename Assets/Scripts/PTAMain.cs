@@ -406,8 +406,8 @@ namespace PTA
             freeTurret.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
 
-            PTAEntity propulsion = PTAEntity.CreatePropulsionPowerup(this);
-            propulsion.Transform.position = GenerateEntityPosition();
+            PTAEntity drive = PTAEntity.CreateDrivePowerup(this);
+            drive.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
 #else
             Invincibility = false;
@@ -519,9 +519,9 @@ namespace PTA
                             powerupEntity = PTAEntity.CreateTurretPowerup(this);
                             break;
                         }
-                        case PowerupType.Propulsion:
+                        case PowerupType.Drive:
                         {
-                            powerupEntity = PTAEntity.CreatePropulsionPowerup(this);
+                            powerupEntity = PTAEntity.CreateDrivePowerup(this);
                             break;
                         }
                     }

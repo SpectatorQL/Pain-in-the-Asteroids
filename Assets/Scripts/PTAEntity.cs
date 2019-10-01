@@ -44,7 +44,7 @@ namespace PTA
     public enum PowerupType
     {
         Turret,
-        Propulsion,
+        Drive,
 
         Count
     }
@@ -74,7 +74,7 @@ namespace PTA
         
         public PTAEntity LTurretSlot;
         public PTAEntity RTurretSlot;
-        public PTAEntity PropulsionSlot;
+        public PTAEntity DriveSlot;
 
         public static void AttachEntity(PTAEntity entity, PTAEntity newParent, Vector3 alignPoint)
         {
@@ -183,7 +183,7 @@ namespace PTA
             return entity;
         }
 
-        public static PTAEntity CreatePropulsionPowerup(PTAMain world)
+        public static PTAEntity CreateDrivePowerup(PTAMain world)
         {
             PTAEntity entity = world.FreeEntities.GetNext();
             if(entity == null)
@@ -200,7 +200,7 @@ namespace PTA
                 entity.Transform.rotation = Quaternion.identity;
 
                 entity.Renderer.material.color = Color.white;
-                entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Propulsion];
+                entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Drive];
 
                 entity.Move = MoveFunctions.MoveStub;
                 entity.Think = ThinkFunctions.ThinkStub;
@@ -208,7 +208,7 @@ namespace PTA
                 entity.GameObject.layer = ThingsLayer;
 
                 entity.EntityTypeID = EntityType.Powerup;
-                entity.PowerupTypeID = PowerupType.Propulsion;
+                entity.PowerupTypeID = PowerupType.Drive;
                 entity.HasSpawned = true;
             }
 
