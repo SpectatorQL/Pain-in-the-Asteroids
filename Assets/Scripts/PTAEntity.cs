@@ -94,6 +94,96 @@ namespace PTA
             entity.Collider.BoxCollider.enabled = true;
         }
 
+
+        public static int PlayerLayer;
+        public static int ThingsLayer;
+
+        public static PTAEntity TurnIntoWildPowerup(PTAMain world, PTAEntity entity)
+        {
+            entity.Move = MoveFunctions.MoveStub;
+            entity.Think = ThinkFunctions.WildPowerupThink;
+
+            entity.EntityTypeID = EntityType.WildPowerup;
+            entity.Data.Health = 1;
+            entity.Data.MovementSpeed = 0.08f;
+
+            return entity;
+        }
+
+        public static PTAEntity CreateTurretPowerup(PTAMain world)
+        {
+            PTAEntity entity = CreatePowerupInternal(world);
+
+            PowerupType powerupType = PowerupType.Turret;
+            entity.Renderer.sprite = world.PowerupSprites[(int)powerupType];
+            entity.PowerupTypeID = powerupType;
+
+            return entity;
+        }
+
+        public static PTAEntity CreateDrivePowerup(PTAMain world)
+        {
+            PTAEntity entity = CreatePowerupInternal(world);
+
+            PowerupType powerupType = PowerupType.Drive;
+            entity.Renderer.sprite = world.PowerupSprites[(int)powerupType];
+            entity.PowerupTypeID = powerupType;
+
+            return entity;
+        }
+
+        static PTAEntity CreatePowerupInternal(PTAMain world)
+        {
+            PTAEntity entity = GetFreeEntity(world);
+
+            entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            entity.Transform.rotation = Quaternion.identity;
+
+            entity.Renderer.material.color = Color.white;
+
+            entity.Move = MoveFunctions.MoveStub;
+            entity.Think = ThinkFunctions.ThinkStub;
+
+            entity.GameObject.layer = ThingsLayer;
+
+            entity.EntityTypeID = EntityType.Powerup;
+            entity.HasSpawned = true;
+
+            return entity;
+        }
+
+        public static PTAEntity CreateFriendlyBullet(PTAMain world)
+        {
+            PTAEntity entity = CreateBulletInternal(world);
+
+            entity.Move = MoveFunctions.LinearMove;
+            entity.Think = ThinkFunctions.ThinkStub;
+            entity.GameObject.layer = PlayerLayer;
+
+            entity.Renderer.material.color = Color.white;
+
+            entity.Data.MovementSpeed = 0.3f;
+
+            return entity;
+        }
+
+        static PTAEntity CreateBulletInternal(PTAMain world)
+        {
+            PTAEntity entity = GetFreeEntity(world);
+
+            entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            entity.Transform.rotation = Quaternion.identity;
+
+            entity.Collider.BoxCollider.enabled = true;
+
+            entity.EntityTypeID = EntityType.Bullet;
+            entity.HasSpawned = true;
+
+            entity.Renderer.sprite = world.Sprites[(int)EntityType.Bullet];
+
+            return entity;
+        }
+
         static EnemyType DetermineEnemyType(PTAMain world)
         {
             EnemyType result = EnemyType.Weak;
@@ -135,206 +225,97 @@ namespace PTA
             return result;
         }
 
-
-        public static int PlayerLayer;
-        public static int ThingsLayer;
-
-        public static PTAEntity TurnIntoWildPowerup(PTAMain world, PTAEntity entity)
+        public static PTAEntity CreateEnemy(PTAMain world)
         {
-            entity.Move = MoveFunctions.MoveStub;
-            entity.Think = ThinkFunctions.WildPowerupThink;
-
-            entity.EntityTypeID = EntityType.WildPowerup;
-            entity.Data.Health = 1;
-            entity.Data.MovementSpeed = 0.08f;
-
-            return entity;
-        }
-
-        public static PTAEntity CreateTurretPowerup(PTAMain world)
-        {
-            PTAEntity entity = world.FreeEntities.GetNext();
-            if(entity == null)
-            {
-                entity = PTAEntity.CreateEntity(world);
-                if(entity == null)
-                {
-                    // TODO(SpectatorQL): Do _something_ when this happens.
-                    Debug.Assert(false, "__PANIC__");
-                    return null;
-                }
-            }
-
-            entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-            entity.Transform.rotation = Quaternion.identity;
-
-            entity.Renderer.material.color = Color.white;
-            entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Turret];
-
-            entity.Move = MoveFunctions.MoveStub;
-            entity.Think = ThinkFunctions.ThinkStub;
+            PTAEntity entity = GetFreeEntity(world);
 
             entity.GameObject.layer = ThingsLayer;
-
-            entity.EntityTypeID = EntityType.Powerup;
-            entity.PowerupTypeID = PowerupType.Turret;
-            entity.HasSpawned = true;
-
-            return entity;
-        }
-
-        public static PTAEntity CreateDrivePowerup(PTAMain world)
-        {
-            PTAEntity entity = world.FreeEntities.GetNext();
-            if(entity == null)
-            {
-                entity = PTAEntity.CreateEntity(world);
-                if(entity == null)
-                {
-                    // TODO(SpectatorQL): Do _something_ when this happens.
-                    Debug.Assert(false, "__PANIC__");
-                    return null;
-                }
-            }
-
-            entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
             entity.Transform.rotation = Quaternion.identity;
+            entity.Transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
 
-            entity.Renderer.material.color = Color.white;
-            entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Drive];
-
-            entity.Move = MoveFunctions.MoveStub;
-            entity.Think = ThinkFunctions.ThinkStub;
-
-            entity.GameObject.layer = ThingsLayer;
-
-            entity.EntityTypeID = EntityType.Powerup;
-            entity.PowerupTypeID = PowerupType.Drive;
-            entity.HasSpawned = true;
-
-            return entity;
-        }
-        
-        public static PTAEntity CreateEntity(PTAMain world, EntityType entityType)
-        {
-            PTAEntity entity = world.FreeEntities.GetNext();
-            if(entity == null)
+            EntityData entityData = new EntityData();
+            EnemyType enemyType = DetermineEnemyType(world);
+            switch(enemyType)
             {
-                entity = PTAEntity.CreateEntity(world);
-                if(entity == null)
+                case EnemyType.Weak:
                 {
-                    // TODO(SpectatorQL): Do _something_ when this happens.
-                    Debug.Assert(false, "__PANIC__");
-                    return null;
-                }
-            }
+                    entity.Renderer.material.color = Color.red;
 
-            Material entityMaterial = entity.Renderer.material;
-            switch(entityType)
-            {
-                case EntityType.Player:
-                {
-                    entity.GameObject.layer = PlayerLayer;
-                    entity.Transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
-
-                    entityMaterial.color = Color.white;
-
-                    entity.Data = new EntityData();
-                    entity.Data.Health = 1;
-                    entity.Data.AttackSpeed = 1.5f;
-                    entity.Data.MovementSpeed = 0.1f;
-
-                    entity.Think = ThinkFunctions.PlayerThink;
-                    break;
-                }
-
-                case EntityType.Enemy:
-                {
-                    entity.GameObject.layer = ThingsLayer;
-                    entity.Transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
-
-                    EntityData entityData = new EntityData();
-                    EnemyType enemyType = DetermineEnemyType(world);
-                    switch(enemyType)
-                    {
-                        case EnemyType.Weak:
-                        {
-                            entityMaterial.color = Color.red;
-
-                            entityData.Health = 1;
-                            break;
-                        }
-                        case EnemyType.Strong:
-                        {
-                            entityMaterial.color = Color.yellow;
-
-                            entityData.Health = 2;
-                            break; 
-                        }
-                        case EnemyType.Uber:
-                        {
-                            entityMaterial.color = Color.green;
-
-                            entityData.Health = 3;
-                            break;
-                        }
-                    }
-                    
+                    entityData.Health = 1;
                     entityData.MovementSpeed = 0.08f;
                     entityData.TimeToSpawn = 2.0f;
-
-                    entity.EnemyTypeID = enemyType;
-                    entity.Data = entityData;
                     break;
                 }
-
-                case EntityType.Powerup:
+                case EnemyType.Strong:
                 {
-                    entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                    entity.Renderer.material.color = Color.yellow;
 
-                    entityMaterial.color = Color.white;
-
-                    entity.Move = MoveFunctions.MoveStub;
-                    entity.Think = ThinkFunctions.ThinkStub;
-
-                    entity.GameObject.layer = ThingsLayer;
+                    entityData.Health = 2;
+                    entityData.MovementSpeed = 0.08f;
+                    entityData.TimeToSpawn = 2.0f;
                     break;
                 }
-
-                case EntityType.Bullet:
+                case EnemyType.Uber:
                 {
-                    entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                    entity.Renderer.material.color = Color.green;
 
-                    entity.Collider.BoxCollider.enabled = true;
-
-                    entityMaterial.color = Color.white;
-
-                    entity.Move = MoveFunctions.MoveStub;
-                    entity.Think = ThinkFunctions.ThinkStub;
-
-                    entity.Data.MovementSpeed = 0.3f;
-                    break;
-                }
-
-
-                case EntityType.Invalid:
-                {
-                    Debug.LogError("Invalid entity type!");
-                    break;
-                }
-                default:
-                {
-                    Debug.LogError("Invalid default case!");
+                    entityData.Health = 3;
+                    entityData.MovementSpeed = 0.08f;
+                    entityData.TimeToSpawn = 2.0f;
                     break;
                 }
             }
+            entity.EnemyTypeID = enemyType;
+            entity.Data = entityData;
 
-            entity.Transform.rotation = Quaternion.identity;
-
-            entity.EntityTypeID = entityType;
+            entity.EntityTypeID = EntityType.Enemy;
             entity.HasSpawned = true;
 
-            entity.Renderer.sprite = world.Sprites[(int)entityType];
+            entity.Renderer.sprite = world.Sprites[(int)EntityType.Enemy];
+
+            return entity;
+        }
+
+        public static PTAEntity CreatePlayer(PTAMain world)
+        {
+            PTAEntity entity = GetFreeEntity(world);
+
+            entity.GameObject.layer = PlayerLayer;
+
+            entity.Transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
+            entity.Transform.rotation = Quaternion.identity;
+
+            entity.Renderer.material.color = Color.white;
+            entity.Renderer.sprite = world.Sprites[(int)EntityType.Player];
+
+            entity.Data = new EntityData
+            {
+                Health = 1,
+                AttackSpeed = 1.5f,
+                MovementSpeed = 0.1f
+            };
+
+            entity.Think = ThinkFunctions.PlayerThink;
+
+            entity.EntityTypeID = EntityType.Player;
+            entity.HasSpawned = true;
+
+            return entity;
+        }
+
+        static PTAEntity GetFreeEntity(PTAMain world)
+        {
+            PTAEntity entity = world.FreeEntities.GetNext();
+            if(entity == null)
+            {
+                entity = CreateEntity(world);
+                if(entity == null)
+                {
+                    // TODO(SpectatorQL): Do _something_ when this happens.
+                    Debug.Assert(false, "__PANIC__");
+                    return null;
+                }
+            }
 
             return entity;
         }

@@ -173,13 +173,11 @@ namespace PTA
                 if(runningAttackSpeed <= 0)
                 {
                     Vector2 fireDirection = worldMousePosition - entity.Transform.position;
-                    PTAEntity newBullet = PTAEntity.CreateEntity(world, EntityType.Bullet);
+                    PTAEntity newBullet = PTAEntity.CreateFriendlyBullet(world);
                     if(newBullet != null)
                     {
                         newBullet.Transform.position = entity.Transform.position;
                         newBullet.Data.MoveDirection = fireDirection.normalized;
-                        newBullet.Move = MoveFunctions.LinearMove;
-                        newBullet.GameObject.layer = PTAEntity.PlayerLayer;
                     }
                     
                     runningAttackSpeed = entity.Data.AttackSpeed;
@@ -392,7 +390,7 @@ namespace PTA
                 Entities[i] = new PTAEntity();
             }
             
-            PlayerEntity = PTAEntity.CreateEntity(this, EntityType.Player);
+            PlayerEntity = PTAEntity.CreatePlayer(this);
             
 #if UNITY_EDITOR
             PTAEntity turretL = PTAEntity.CreateTurretPowerup(this);
@@ -455,18 +453,18 @@ namespace PTA
                 while(WaveData.EnemiesOnScreen < WaveData.MaxSpawnedEnemiesOnScreen
                     && WaveData.EnemiesOnScreen < WaveData.EnemyCount)
                 {
-                    PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
-                    if(hostileEntity != null)
+                    PTAEntity enemyEntity = PTAEntity.CreateEnemy(this);
+                    if(enemyEntity != null)
                     {
-                        hostileEntity.HasSpawned = false;
+                        enemyEntity.HasSpawned = false;
 
-                        hostileEntity.Move = MoveFunctions.SineMove;
-                        hostileEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
-                        hostileEntity.Think = ThinkFunctions.HostileThink;
+                        enemyEntity.Move = MoveFunctions.SineMove;
+                        enemyEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
+                        enemyEntity.Think = ThinkFunctions.HostileThink;
 
-                        hostileEntity.Transform.position = GenerateEntityPosition();
+                        enemyEntity.Transform.position = GenerateEntityPosition();
 
-                        hostileEntity.Collider.BoxCollider.enabled = false;
+                        enemyEntity.Collider.BoxCollider.enabled = false;
                     }
 
                     ++WaveData.EnemiesOnScreen;
