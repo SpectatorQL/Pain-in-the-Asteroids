@@ -110,7 +110,7 @@ namespace PTA
             }
         }
 
-        public static void RogueThink(PTAMain world, PTAEntity entity, float dt)
+        public static void WildPowerupThink(PTAMain world, PTAEntity entity, float dt)
         {
             entity.Rigidbody.velocity = Vector2.zero;
 
@@ -257,7 +257,7 @@ namespace PTA
         public int MaxWave = 9;
 
         public float PowerupStayChance;
-        public float RogueEnemySpawnChance;
+        public float WildPowerupSpawnChance;
     }
     
     public class PTAMain : MonoBehaviour

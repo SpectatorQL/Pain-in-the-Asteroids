@@ -21,13 +21,13 @@ namespace PTA
             else
             {
                 spawnChance = Random.value;
-                if(spawnChance < World.WaveData.RogueEnemySpawnChance)
+                if(spawnChance < World.WaveData.WildPowerupSpawnChance)
                 {
                     World.FreeEntities.Add(entity);
                 }
                 else
                 {
-                    PTAEntity.MakeRogue(World, entity);
+                    PTAEntity.TurnIntoWildPowerup(World, entity);
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace PTA
                 PTAEntity other = collider.Self;
                 if(Self.EntityTypeID == EntityType.Player
                    || Self.EntityTypeID == EntityType.Enemy
-                   || Self.EntityTypeID == EntityType.RogueEnemy)
+                   || Self.EntityTypeID == EntityType.WildPowerup)
                 {
                     if(other.EntityTypeID == EntityType.Turret)
                     {
@@ -141,7 +141,7 @@ namespace PTA
                     }
 
                     else if(Self.EntityTypeID == EntityType.Player
-                        && other.EntityTypeID == EntityType.RogueEnemy)
+                        && other.EntityTypeID == EntityType.WildPowerup)
                     {
                         if(!World.Invincibility)
                         {
@@ -175,7 +175,7 @@ namespace PTA
                         }
                     }
 
-                    else if(Self.EntityTypeID == EntityType.RogueEnemy
+                    else if(Self.EntityTypeID == EntityType.WildPowerup
                         && other.EntityTypeID == EntityType.Player)
                     {
                         --Self.Data.Health;

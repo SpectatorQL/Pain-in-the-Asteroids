@@ -29,7 +29,7 @@ namespace PTA
 
         Bullet,
 
-        RogueEnemy,
+        WildPowerup,
 
         Count
     }
@@ -132,12 +132,12 @@ namespace PTA
         public static int PlayerLayer;
         public static int ThingsLayer;
 
-        public static PTAEntity MakeRogue(PTAMain world, PTAEntity entity)
+        public static PTAEntity TurnIntoWildPowerup(PTAMain world, PTAEntity entity)
         {
             entity.Move = MoveFunctions.MoveStub;
-            entity.Think = ThinkFunctions.RogueThink;
+            entity.Think = ThinkFunctions.WildPowerupThink;
 
-            entity.EntityTypeID = EntityType.RogueEnemy;
+            entity.EntityTypeID = EntityType.WildPowerup;
             entity.Data.Health = 1;
             entity.Data.MovementSpeed = 0.08f;
 
