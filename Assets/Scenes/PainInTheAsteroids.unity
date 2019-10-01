@@ -331,7 +331,7 @@ MonoBehaviour:
   Points:
     LTurretPosition: {x: 0.04, y: 0.23}
     RTurretPosition: {x: 0.04, y: -0.23}
-    PropulsionPosition: {x: -0.2, y: 0}
+    DrivePosition: {x: -0.2, y: 0}
   DrawGizmos: 1
 --- !u!1 &514338073
 GameObject:

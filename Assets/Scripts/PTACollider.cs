@@ -11,7 +11,7 @@ namespace PTA
         
         public PTAMain World;
         
-        void DetermineEntityFate(PTAEntity entity)
+        void DetermineEntityFate(PTAMain world, PTAEntity entity)
         {
             float spawnChance = Random.value;
             if(spawnChance < World.WaveData.PowerupStayChance)
@@ -28,11 +28,12 @@ namespace PTA
                 else
                 {
                     PTAEntity.TurnIntoWildPowerup(World, entity);
+                    ++world.WaveData.WildPowerupCount;
                 }
             }
         }
 
-        void DetachEntitiesOnDeath(PTAEntity entity)
+        void DetachEntitiesOnDeath(PTAMain world, PTAEntity entity)
         {
             // NOTE(SpectatorQL): I would really like to put these in a union and just loop through an array, but oh well.
             PTAEntity lTurret = Self.LTurretSlot;
@@ -44,21 +45,21 @@ namespace PTA
                 PTAEntity.DetachEntity(lTurret);
                 Self.LTurretSlot = null;
 
-                DetermineEntityFate(lTurret);
+                DetermineEntityFate(world, lTurret);
             }
             if(rTurret != null)
             {
                 PTAEntity.DetachEntity(rTurret);
                 Self.RTurretSlot = null;
 
-                DetermineEntityFate(rTurret);
+                DetermineEntityFate(world, rTurret);
             }
             if(drive != null)
             {
                 PTAEntity.DetachEntity(drive);
                 Self.DriveSlot = null;
 
-                DetermineEntityFate(drive);
+                DetermineEntityFate(world, drive);
             }
         }
 
@@ -111,7 +112,7 @@ namespace PTA
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
                         {
-                            DetachEntitiesOnDeath(Self);
+                            DetachEntitiesOnDeath(World, Self);
                             World.FreeEntities.Add(Self);
 
                             if(Self.EntityTypeID == EntityType.Enemy)
@@ -170,7 +171,7 @@ namespace PTA
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
                         {
-                            DetachEntitiesOnDeath(Self);
+                            DetachEntitiesOnDeath(World, Self);
                             World.FreeEntities.Add(Self);
 
                             --World.WaveData.EnemyCount;
@@ -184,7 +185,8 @@ namespace PTA
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
                         {
-                            DetachEntitiesOnDeath(Self);
+                            DetachEntitiesOnDeath(World, Self);
+                            --World.WaveData.WildPowerupCount;
                             World.FreeEntities.Add(Self);
                         }
                     }

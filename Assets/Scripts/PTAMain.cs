@@ -252,11 +252,12 @@ namespace PTA
         public float PowerupWaitTime = 5.0f;
         public float MinPowerupWaitTime = 2.5f;
         public float RunningPowerupTime;
+        public float PowerupStayChance;
 
         public int CurrentWave;
         public int MaxWave = 9;
 
-        public float PowerupStayChance;
+        public int WildPowerupCount;
         public float WildPowerupSpawnChance;
     }
     
