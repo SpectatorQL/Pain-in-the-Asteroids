@@ -449,7 +449,6 @@ namespace PTA
             {
                 Debug.Assert(WaveData.EnemiesOnScreen <= WaveData.EnemyCount
                     && WaveData.EnemiesOnScreen >= 0);
-                // TODO(SpectatorQL): Do I want "rogue" detached entities to increment EnemiesOnScreen? I don't think I do but we'll see.
                 while(WaveData.EnemiesOnScreen < WaveData.MaxSpawnedEnemiesOnScreen
                     && WaveData.EnemiesOnScreen < WaveData.EnemyCount)
                 {
@@ -478,33 +477,38 @@ namespace PTA
             }
             else
             {
-                int nextWave = WaveData.CurrentWave + 1;
-                if(nextWave < WaveData.MaxWave)
+                Debug.Assert(WaveData.WildPowerupCount >= 0);
+                if(WaveData.WildPowerupCount == 0)
                 {
-                    int newEnemyCount = nextWave;
-                    WaveData.EnemyCount = newEnemyCount;
-                    
-                    if(nextWave % 5 == 0
-                        && WaveData.PowerupWaitTime > WaveData.MinPowerupWaitTime)
+                    int nextWave = WaveData.CurrentWave + 1;
+                    if(nextWave < WaveData.MaxWave)
                     {
-                        WaveData.PowerupWaitTime -= 0.5f;
+                        int newEnemyCount = nextWave;
+                        WaveData.EnemyCount = newEnemyCount;
+
+                        if(nextWave % 5 == 0
+                            && WaveData.PowerupWaitTime > WaveData.MinPowerupWaitTime)
+                        {
+                            WaveData.PowerupWaitTime -= 0.5f;
+                        }
+
+                        UI.WaveText.text = $"Wave: {nextWave}";
+
+                        WaveData.CurrentWave = nextWave;
                     }
-
-                    UI.WaveText.text = $"Wave: {nextWave}";
-
-                    WaveData.CurrentWave = nextWave;
-                }
-                else
-                {
-                    // TODO(SpectatorQL): End screen.
-                    WaveData.EnemyCount = 0;
-                    Debug.Log("YOU WIN!!!");
+                    else
+                    {
+                        // TODO(SpectatorQL): End screen.
+                        WaveData.EnemyCount = 0;
+                        Debug.Log("YOU WIN!!!");
+                    }
                 }
             }
 
+
             if(WaveData.PowerupCount < WaveData.MaxPowerupsOnScreen)
             {
-                if(WaveData.RunningPowerupTime < 0)
+                if(WaveData.RunningPowerupTime <= 0)
                 {
                     // NOTE(SpectatorQL): Oh, so this thing is _exclusive_ but the float version is _inclusive_. Gotta love Unity...
                     PowerupType powerupType = (PowerupType)UnityEngine.Random.Range(0, (int)PowerupType.Count);
@@ -534,7 +538,10 @@ namespace PTA
                     ++WaveData.PowerupCount;
                 }
             }
-            WaveData.RunningPowerupTime -= dt;
+            if(WaveData.RunningPowerupTime > 0)
+            {
+                WaveData.RunningPowerupTime -= dt;
+            }
 
 
             for(int i = 0;
