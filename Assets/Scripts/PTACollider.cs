@@ -76,28 +76,31 @@ namespace PTA
                    || Self.EntityTypeID == EntityType.Enemy
                    || Self.EntityTypeID == EntityType.WildPowerup)
                 {
-                    if(other.EntityTypeID == EntityType.Turret)
+                    if(other.EntityTypeID == EntityType.Powerup)
                     {
-                        if(Self.LTurretSlot == null)
+                        if(other.PowerupTypeID == PowerupType.Turret)
                         {
-                            PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.LTurretPosition);
-                            Self.LTurretSlot = other;
-                            --World.WaveData.PowerupCount;
+                            if(Self.LTurretSlot == null)
+                            {
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.LTurretPosition);
+                                Self.LTurretSlot = other;
+                                --World.WaveData.PowerupCount;
+                            }
+                            else if(Self.RTurretSlot == null)
+                            {
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.RTurretPosition);
+                                Self.RTurretSlot = other;
+                                --World.WaveData.PowerupCount;
+                            }
                         }
-                        else if(Self.RTurretSlot == null)
+                        else if(other.PowerupTypeID == PowerupType.Propulsion)
                         {
-                            PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.RTurretPosition);
-                            Self.RTurretSlot = other;
-                            --World.WaveData.PowerupCount;
-                        }
-                    }
-                    else if(other.EntityTypeID == EntityType.Propulsion)
-                    {
-                        if(Self.PropulsionSlot == null)
-                        {
-                            PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.PropulsionPosition);
-                            Self.PropulsionSlot = other;
-                            --World.WaveData.PowerupCount;
+                            if(Self.PropulsionSlot == null)
+                            {
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.PropulsionPosition);
+                                Self.PropulsionSlot = other;
+                                --World.WaveData.PowerupCount;
+                            }
                         }
                     }
 

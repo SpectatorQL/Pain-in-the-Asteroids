@@ -24,11 +24,9 @@ namespace PTA
         Player,
         Enemy,
 
-        Turret,
-        Propulsion,
-
         Bullet,
 
+        Powerup,
         WildPowerup,
 
         Count
@@ -43,6 +41,14 @@ namespace PTA
         Count
     }
 
+    public enum PowerupType
+    {
+        Turret,
+        Propulsion,
+
+        Count
+    }
+
     // TODO(SpectatorQL): Alignment !!!
     [Serializable]
     public class PTAEntity
@@ -51,6 +57,7 @@ namespace PTA
         public uint EntityID;
         public EntityType EntityTypeID;
         public EnemyType EnemyTypeID;
+        public PowerupType PowerupTypeID;
         public bool IsActive;
         public bool HasSpawned;
 
@@ -143,6 +150,70 @@ namespace PTA
 
             return entity;
         }
+
+        public static PTAEntity CreateTurretPowerup(PTAMain world)
+        {
+            PTAEntity entity = world.FreeEntities.GetNext();
+            if(entity == null)
+            {
+                entity = PTAEntity.CreateEntity(world);
+                if(entity == null)
+                {
+                    // TODO(SpectatorQL): Do _something_ when this happens.
+                    Debug.Assert(false, "__PANIC__");
+                    return null;
+                }
+
+                entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                entity.Transform.rotation = Quaternion.identity;
+
+                entity.Renderer.material.color = Color.white;
+                entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Turret];
+
+                entity.Move = MoveFunctions.MoveStub;
+                entity.Think = ThinkFunctions.ThinkStub;
+
+                entity.GameObject.layer = ThingsLayer;
+
+                entity.EntityTypeID = EntityType.Powerup;
+                entity.PowerupTypeID = PowerupType.Turret;
+                entity.HasSpawned = true;
+            }
+
+            return entity;
+        }
+
+        public static PTAEntity CreatePropulsionPowerup(PTAMain world)
+        {
+            PTAEntity entity = world.FreeEntities.GetNext();
+            if(entity == null)
+            {
+                entity = PTAEntity.CreateEntity(world);
+                if(entity == null)
+                {
+                    // TODO(SpectatorQL): Do _something_ when this happens.
+                    Debug.Assert(false, "__PANIC__");
+                    return null;
+                }
+
+                entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                entity.Transform.rotation = Quaternion.identity;
+
+                entity.Renderer.material.color = Color.white;
+                entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Propulsion];
+
+                entity.Move = MoveFunctions.MoveStub;
+                entity.Think = ThinkFunctions.ThinkStub;
+
+                entity.GameObject.layer = ThingsLayer;
+
+                entity.EntityTypeID = EntityType.Powerup;
+                entity.PowerupTypeID = PowerupType.Propulsion;
+                entity.HasSpawned = true;
+            }
+
+            return entity;
+        }
         
         public static PTAEntity CreateEntity(PTAMain world, EntityType entityType)
         {
@@ -217,20 +288,7 @@ namespace PTA
                     break;
                 }
 
-                case EntityType.Turret:
-                {
-                    entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-
-                    entityMaterial.color = Color.white;
-
-                    entity.Move = MoveFunctions.MoveStub;
-                    entity.Think = ThinkFunctions.ThinkStub;
-
-                    entity.GameObject.layer = ThingsLayer;
-                    break;
-                }
-
-                case EntityType.Propulsion:
+                case EntityType.Powerup:
                 {
                     entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 

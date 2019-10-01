@@ -294,6 +294,8 @@ namespace PTA
         
         [EnumNamedArray(typeof(EntityType))]
         public Sprite[] Sprites = new Sprite[(int)EntityType.Count];
+        [EnumNamedArray(typeof(PowerupType))]
+        public Sprite[] PowerupSprites = new Sprite[(int)PowerupType.Count];
 
         Vector2 GenerateEntityPosition()
         {
@@ -392,19 +394,19 @@ namespace PTA
             PlayerEntity = PTAEntity.CreateEntity(this, EntityType.Player);
             
 #if UNITY_EDITOR
-            PTAEntity turretL = PTAEntity.CreateEntity(this, EntityType.Turret);
+            PTAEntity turretL = PTAEntity.CreateTurretPowerup(this);
             turretL.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
             
-            PTAEntity turretR = PTAEntity.CreateEntity(this, EntityType.Turret);
+            PTAEntity turretR = PTAEntity.CreateTurretPowerup(this);
             turretR.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
 
-            PTAEntity freeTurret = PTAEntity.CreateEntity(this, EntityType.Turret);
+            PTAEntity freeTurret = PTAEntity.CreateTurretPowerup(this);
             freeTurret.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
 
-            PTAEntity propulsion = PTAEntity.CreateEntity(this, EntityType.Propulsion);
+            PTAEntity propulsion = PTAEntity.CreatePropulsionPowerup(this);
             propulsion.Transform.position = GenerateEntityPosition();
             ++WaveData.PowerupCount;
 #else
@@ -506,14 +508,29 @@ namespace PTA
                 if(WaveData.RunningPowerupTime < 0)
                 {
                     // NOTE(SpectatorQL): Oh, so this thing is _exclusive_ but the float version is _inclusive_. Gotta love Unity...
-                    EntityType powerupType = (EntityType)UnityEngine.Random.Range((int)EntityType.Turret, (int)(EntityType.Propulsion + 1));
-                    Debug.Assert(powerupType < EntityType.Count);
-                    Debug.Assert(powerupType != EntityType.Enemy);
-                    PTAEntity powerupEntity = PTAEntity.CreateEntity(this, powerupType);
+                    PowerupType powerupType = (PowerupType)UnityEngine.Random.Range(0, (int)PowerupType.Count);
+                    Debug.Assert(powerupType < PowerupType.Count);
+
+                    PTAEntity powerupEntity = null;
+                    switch(powerupType)
+                    {
+                        case PowerupType.Turret:
+                        {
+                            powerupEntity = PTAEntity.CreateTurretPowerup(this);
+                            break;
+                        }
+                        case PowerupType.Propulsion:
+                        {
+                            powerupEntity = PTAEntity.CreatePropulsionPowerup(this);
+                            break;
+                        }
+                    }
+
                     if(powerupEntity != null)
                     {
                         powerupEntity.Transform.position = GenerateEntityPosition();
                     }
+
                     WaveData.RunningPowerupTime = WaveData.PowerupWaitTime;
                     ++WaveData.PowerupCount;
                 }
