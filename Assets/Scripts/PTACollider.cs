@@ -73,9 +73,7 @@ namespace PTA
             if(collider != null)
             {
                 PTAEntity other = collider.Self;
-                if(Self.EntityTypeID == EntityType.Player
-                   || Self.EntityTypeID == EntityType.Enemy
-                   || Self.EntityTypeID == EntityType.WildPowerup)
+                if(Self.EntityTypeID == EntityType.Player)
                 {
                     if(other.EntityTypeID == EntityType.Powerup)
                     {
@@ -123,8 +121,7 @@ namespace PTA
                         }
                     }
 
-                    else if(Self.EntityTypeID == EntityType.Player
-                        && other.EntityTypeID == EntityType.Enemy)
+                    else if(other.EntityTypeID == EntityType.Enemy)
                     {
                         if(!World.Invincibility)
                         {
@@ -144,8 +141,7 @@ namespace PTA
                         }
                     }
 
-                    else if(Self.EntityTypeID == EntityType.Player
-                        && other.EntityTypeID == EntityType.WildPowerup)
+                    else if(other.EntityTypeID == EntityType.WildPowerup)
                     {
                         if(!World.Invincibility)
                         {
@@ -164,9 +160,58 @@ namespace PTA
                             }
                         }
                     }
+                }
 
-                    else if(Self.EntityTypeID == EntityType.Enemy
-                        && other.EntityTypeID == EntityType.Player)
+                else if(Self.EntityTypeID == EntityType.Enemy)
+                {
+                    if(other.EntityTypeID == EntityType.Powerup)
+                    {
+                        if(other.PowerupTypeID == PowerupType.Turret)
+                        {
+                            if(Self.LTurretSlot == null)
+                            {
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.LTurretPosition);
+                                Self.LTurretSlot = other;
+                                --World.WaveData.PowerupCount;
+                            }
+                            else if(Self.RTurretSlot == null)
+                            {
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.RTurretPosition);
+                                Self.RTurretSlot = other;
+                                --World.WaveData.PowerupCount;
+                            }
+                        }
+
+                        else if(other.PowerupTypeID == PowerupType.Drive)
+                        {
+                            if(Self.DriveSlot == null)
+                            {
+                                PTAEntity.AttachEntity(other, Self, World.EntityAlignment.Points.DrivePosition);
+                                Self.DriveSlot = other;
+                                --World.WaveData.PowerupCount;
+                            }
+                        }
+                    }
+
+                    else if(other.EntityTypeID == EntityType.Bullet)
+                    {
+                        World.FreeEntities.Add(other);
+
+                        --Self.Data.Health;
+                        if(Self.Data.Health == 0)
+                        {
+                            DetachEntitiesOnDeath(World, Self);
+                            World.FreeEntities.Add(Self);
+
+                            if(Self.EntityTypeID == EntityType.Enemy)
+                            {
+                                --World.WaveData.EnemyCount;
+                                --World.WaveData.EnemiesOnScreen;
+                            }
+                        }
+                    }
+
+                    else if(other.EntityTypeID == EntityType.Player)
                     {
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
@@ -178,9 +223,24 @@ namespace PTA
                             --World.WaveData.EnemiesOnScreen;
                         }
                     }
+                }
 
-                    else if(Self.EntityTypeID == EntityType.WildPowerup
-                        && other.EntityTypeID == EntityType.Player)
+                else if(Self.EntityTypeID == EntityType.WildPowerup)
+                {
+                    if(other.EntityTypeID == EntityType.Bullet)
+                    {
+                        World.FreeEntities.Add(other);
+
+                        --Self.Data.Health;
+                        if(Self.Data.Health == 0)
+                        {
+                            DetachEntitiesOnDeath(World, Self);
+                            --World.WaveData.WildPowerupCount;
+                            World.FreeEntities.Add(Self);
+                        }
+                    }
+
+                    else if(other.EntityTypeID == EntityType.Player)
                     {
                         --Self.Data.Health;
                         if(Self.Data.Health == 0)
@@ -190,12 +250,6 @@ namespace PTA
                             World.FreeEntities.Add(Self);
                         }
                     }
-#if false
-                    else
-                    {
-                        Debug.Log($"Unknown collision occured!\nSelf: {Self.EntityTypeID}, Other: {other.EntityTypeID}");
-                    }
-#endif
                 }
             }
         }
