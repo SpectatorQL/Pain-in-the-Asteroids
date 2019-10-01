@@ -111,7 +111,7 @@ namespace PTA
                             DetachEntitiesOnDeath(Self);
                             World.FreeEntities.Add(Self);
 
-                            if(Self.IsHostile)
+                            if(Self.EntityTypeID == EntityType.Enemy)
                             {
                                 --World.WaveData.EnemyCount;
                                 --World.WaveData.EnemiesOnScreen;
@@ -170,11 +170,8 @@ namespace PTA
                             DetachEntitiesOnDeath(Self);
                             World.FreeEntities.Add(Self);
 
-                            if(Self.IsHostile)
-                            {
-                                --World.WaveData.EnemyCount;
-                                --World.WaveData.EnemiesOnScreen;
-                            }
+                            --World.WaveData.EnemyCount;
+                            --World.WaveData.EnemiesOnScreen;
                         }
                     }
 

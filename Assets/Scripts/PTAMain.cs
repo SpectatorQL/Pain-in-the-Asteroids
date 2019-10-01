@@ -455,7 +455,6 @@ namespace PTA
                     PTAEntity hostileEntity = PTAEntity.CreateEntity(this, EntityType.Enemy);
                     if(hostileEntity != null)
                     {
-                        hostileEntity.IsHostile = true;
                         hostileEntity.HasSpawned = false;
 
                         hostileEntity.Move = MoveFunctions.SineMove;

@@ -52,7 +52,6 @@ namespace PTA
         public EntityType EntityTypeID;
         public EnemyType EnemyTypeID;
         public bool IsActive;
-        public bool IsHostile;
         public bool HasSpawned;
 
         // TODO(SpectatorQL): Figure out whether we really need all of the stuff that's in a GameObject!
@@ -275,7 +274,6 @@ namespace PTA
             entity.Transform.rotation = Quaternion.identity;
 
             entity.EntityTypeID = entityType;
-            entity.IsHostile = false;
             entity.HasSpawned = true;
 
             entity.Renderer.sprite = world.Sprites[(int)entityType];
