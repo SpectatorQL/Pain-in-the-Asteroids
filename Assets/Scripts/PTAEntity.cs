@@ -163,22 +163,22 @@ namespace PTA
                     Debug.Assert(false, "__PANIC__");
                     return null;
                 }
-
-                entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-                entity.Transform.rotation = Quaternion.identity;
-
-                entity.Renderer.material.color = Color.white;
-                entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Turret];
-
-                entity.Move = MoveFunctions.MoveStub;
-                entity.Think = ThinkFunctions.ThinkStub;
-
-                entity.GameObject.layer = ThingsLayer;
-
-                entity.EntityTypeID = EntityType.Powerup;
-                entity.PowerupTypeID = PowerupType.Turret;
-                entity.HasSpawned = true;
             }
+
+            entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            entity.Transform.rotation = Quaternion.identity;
+
+            entity.Renderer.material.color = Color.white;
+            entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Turret];
+
+            entity.Move = MoveFunctions.MoveStub;
+            entity.Think = ThinkFunctions.ThinkStub;
+
+            entity.GameObject.layer = ThingsLayer;
+
+            entity.EntityTypeID = EntityType.Powerup;
+            entity.PowerupTypeID = PowerupType.Turret;
+            entity.HasSpawned = true;
 
             return entity;
         }
@@ -195,22 +195,22 @@ namespace PTA
                     Debug.Assert(false, "__PANIC__");
                     return null;
                 }
-
-                entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-                entity.Transform.rotation = Quaternion.identity;
-
-                entity.Renderer.material.color = Color.white;
-                entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Drive];
-
-                entity.Move = MoveFunctions.MoveStub;
-                entity.Think = ThinkFunctions.ThinkStub;
-
-                entity.GameObject.layer = ThingsLayer;
-
-                entity.EntityTypeID = EntityType.Powerup;
-                entity.PowerupTypeID = PowerupType.Drive;
-                entity.HasSpawned = true;
             }
+
+            entity.Transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            entity.Transform.rotation = Quaternion.identity;
+
+            entity.Renderer.material.color = Color.white;
+            entity.Renderer.sprite = world.PowerupSprites[(int)PowerupType.Drive];
+
+            entity.Move = MoveFunctions.MoveStub;
+            entity.Think = ThinkFunctions.ThinkStub;
+
+            entity.GameObject.layer = ThingsLayer;
+
+            entity.EntityTypeID = EntityType.Powerup;
+            entity.PowerupTypeID = PowerupType.Drive;
+            entity.HasSpawned = true;
 
             return entity;
         }
