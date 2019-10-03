@@ -203,11 +203,8 @@ namespace PTA
                             DetachEntitiesOnDeath(World, Self);
                             World.FreeEntities.Add(Self);
 
-                            if(Self.EntityTypeID == EntityType.Enemy)
-                            {
-                                --World.WaveData.EnemyCount;
-                                --World.WaveData.EnemiesOnScreen;
-                            }
+                            --World.WaveData.EnemyCount;
+                            --World.WaveData.EnemiesOnScreen;
                         }
                     }
 
