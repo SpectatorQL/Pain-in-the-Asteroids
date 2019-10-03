@@ -17,15 +17,15 @@ namespace PTA
         }
     }
     
-    public delegate void Move(PTAEntity entity);
+    public delegate void Move(PTAMain world, PTAEntity entity);
     public static class MoveFunctions
     {
-        public static void MoveStub(PTAEntity entity)
+        public static void MoveStub(PTAMain world, PTAEntity entity)
         {
             entity.Rigidbody.velocity = Vector2.zero;
         }
         
-        public static void SineMove(PTAEntity entity)
+        public static void SineMove(PTAMain world, PTAEntity entity)
         {
             if(!entity.HasSpawned)
                 return;
@@ -56,7 +56,7 @@ namespace PTA
             entity.Data.TSine += 0.15f;
         }
         
-        public static void LinearMove(PTAEntity entity)
+        public static void LinearMove(PTAMain world, PTAEntity entity)
         {
             if(!entity.HasSpawned)
                 return;
@@ -66,6 +66,22 @@ namespace PTA
             Vector2 entityPosition = entity.Transform.position;
 
             Vector2 newPosition = entityPosition + entity.Data.MoveDirection.normalized * entity.Data.MovementSpeed;
+            entity.Rigidbody.MovePosition(newPosition);
+
+            float rotationAngle = Mathf.Atan2(newPosition.y - entityPosition.y, newPosition.x - entityPosition.x) * Mathf.Rad2Deg;
+            Vector3 eulers = entity.Transform.eulerAngles;
+            eulers.z = rotationAngle;
+            entity.Transform.eulerAngles = eulers;
+        }
+
+        public static void HomingMove(PTAMain world, PTAEntity entity)
+        {
+            entity.Rigidbody.velocity = Vector2.zero;
+
+            Vector2 entityPosition = entity.Transform.position;
+
+            Vector2 direction = (Vector2)world.PlayerEntity.Transform.position - entityPosition;
+            Vector2 newPosition = entityPosition + direction.normalized * entity.Data.MovementSpeed;
             entity.Rigidbody.MovePosition(newPosition);
 
             float rotationAngle = Mathf.Atan2(newPosition.y - entityPosition.y, newPosition.x - entityPosition.x) * Mathf.Rad2Deg;
@@ -108,22 +124,6 @@ namespace PTA
                 entity.Collider.BoxCollider.enabled = true;
                 entity.HasSpawned = true;
             }
-        }
-
-        public static void WildPowerupThink(PTAMain world, PTAEntity entity, float dt)
-        {
-            entity.Rigidbody.velocity = Vector2.zero;
-
-            Vector2 entityPosition = entity.Transform.position;
-
-            Vector2 direction = (Vector2)world.PlayerEntity.Transform.position - entityPosition;
-            Vector2 newPosition = entityPosition + direction.normalized * entity.Data.MovementSpeed;
-            entity.Rigidbody.MovePosition(newPosition);
-
-            float rotationAngle = Mathf.Atan2(newPosition.y - entityPosition.y, newPosition.x - entityPosition.x) * Mathf.Rad2Deg;
-            Vector3 eulers = entity.Transform.eulerAngles;
-            eulers.z = rotationAngle;
-            entity.Transform.eulerAngles = eulers;
         }
         
         public static void PlayerThink(PTAMain world, PTAEntity entity, float dt)
@@ -424,7 +424,7 @@ namespace PTA
             UI = FindObjectOfType<PTAUI>();
         }
         
-        // TODO(SpectatorQL): Is it necessary to split Move and Think?
+        // TODO(SpectatorQL): Is it necessary to split Move and Think? 
         void FixedUpdate()
         {
             for(int i = 0;
@@ -434,7 +434,7 @@ namespace PTA
                 PTAEntity entity = Entities[i];
                 if(entity.IsActive)
                 {
-                    entity.Move(entity);
+                    entity.Move(this, entity);
                 }
             }
         }

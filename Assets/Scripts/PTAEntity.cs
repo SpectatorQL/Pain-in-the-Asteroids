@@ -100,8 +100,8 @@ namespace PTA
 
         public static PTAEntity TurnIntoWildPowerup(PTAMain world, PTAEntity entity)
         {
-            entity.Move = MoveFunctions.MoveStub;
-            entity.Think = ThinkFunctions.WildPowerupThink;
+            entity.Move = MoveFunctions.HomingMove;
+            entity.Think = ThinkFunctions.ThinkStub;
 
             entity.EntityTypeID = EntityType.WildPowerup;
             entity.Data.Health = 1;
