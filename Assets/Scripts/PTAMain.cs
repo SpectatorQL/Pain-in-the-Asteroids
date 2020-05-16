@@ -296,6 +296,8 @@ namespace PTA
         }
 
         PlayAreaDimensions PlayArea;
+        int CurrentScreenWidth;
+        int CurrentScreenHeight;
 
         PTAUI UI;
         
@@ -304,13 +306,30 @@ namespace PTA
         [EnumNamedArray(typeof(PowerupType))]
         public Sprite[] PowerupSprites = new Sprite[(int)PowerupType.Count];
 
-        Vector2 GenerateEntityPosition()
+        static Vector2 GenerateEntityPosition(PlayAreaDimensions playArea)
         {
             Vector2 result = new Vector2();
 
             float safetyNet = 1.0f;
-            result.x = UnityEngine.Random.Range(PlayArea.MinX + safetyNet, PlayArea.MaxX - safetyNet);
-            result.y = UnityEngine.Random.Range(PlayArea.MinY + safetyNet, PlayArea.MaxY - safetyNet);
+            result.x = UnityEngine.Random.Range(playArea.MinX + safetyNet, playArea.MaxX - safetyNet);
+            result.y = UnityEngine.Random.Range(playArea.MinY + safetyNet, playArea.MaxY - safetyNet);
+
+            return result;
+        }
+
+        static PlayAreaDimensions CalculatePlayArea(int screenWidth, int screenHeight)
+        {
+            PlayAreaDimensions result = new PlayAreaDimensions();
+            
+            Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 10));
+            Vector2 topRight = Camera.main.ScreenToWorldPoint(new Vector3(screenWidth, screenHeight, 10));
+
+            float offscreenOffset = 1.0f;
+            result.MinX = bottomLeft.x - offscreenOffset;
+            result.MinY = bottomLeft.y - offscreenOffset;
+            result.MaxX = topRight.x + offscreenOffset;
+            result.MaxY = topRight.y + offscreenOffset;
+            result.Center = Camera.main.ScreenToWorldPoint(new Vector3(screenWidth / 2, screenHeight / 2, 10));
 
             return result;
         }
@@ -324,16 +343,11 @@ namespace PTA
             {
                 Debug.LogError("Layers are missing! Check the layers settings in Edit/Project Settings/Tags and Layers !");
             }
-            
 
-            Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 10));
-            Vector2 topRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 10));
-            float offscreenOffset = 1.0f;
-            PlayArea.MinX = bottomLeft.x - offscreenOffset;
-            PlayArea.MinY = bottomLeft.y - offscreenOffset;
-            PlayArea.MaxX = topRight.x + offscreenOffset;
-            PlayArea.MaxY = topRight.y + offscreenOffset;
-            PlayArea.Center = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, 10));
+
+            CurrentScreenWidth = Screen.width;
+            CurrentScreenHeight = Screen.height;
+            PlayArea = CalculatePlayArea(CurrentScreenWidth, CurrentScreenHeight);
 
             Vector2 xWallSize = new Vector2(1.0f, PlayArea.MaxY - PlayArea.MinY);
             Vector2 yWallSize = new Vector2(PlayArea.MaxX - PlayArea.MinX, 1.0f);
@@ -402,19 +416,19 @@ namespace PTA
             
 #if UNITY_EDITOR
             PTAEntity turretL = PTAEntity.CreateTurretPowerup(this);
-            turretL.Transform.position = GenerateEntityPosition();
+            turretL.Transform.position = GenerateEntityPosition(PlayArea);
             ++WaveData.PowerupCount;
             
             PTAEntity turretR = PTAEntity.CreateTurretPowerup(this);
-            turretR.Transform.position = GenerateEntityPosition();
+            turretR.Transform.position = GenerateEntityPosition(PlayArea);
             ++WaveData.PowerupCount;
 
             PTAEntity freeTurret = PTAEntity.CreateTurretPowerup(this);
-            freeTurret.Transform.position = GenerateEntityPosition();
+            freeTurret.Transform.position = GenerateEntityPosition(PlayArea);
             ++WaveData.PowerupCount;
 
             PTAEntity drive = PTAEntity.CreateDrivePowerup(this);
-            drive.Transform.position = GenerateEntityPosition();
+            drive.Transform.position = GenerateEntityPosition(PlayArea);
             ++WaveData.PowerupCount;
 #else
             Cheats.Invincibility = false;
@@ -452,6 +466,18 @@ namespace PTA
         {
             float dt = Time.deltaTime;
 
+            int screenWidth = Screen.width;
+            int screenHeight = Screen.height;
+            if(screenWidth != CurrentScreenWidth || screenHeight != CurrentScreenHeight)
+            {
+                CurrentScreenWidth = screenWidth;
+                CurrentScreenHeight = screenHeight;
+
+                PlayArea = CalculatePlayArea(CurrentScreenWidth, CurrentScreenHeight);
+                // TODO(SpectatorQL): REPOSITION ENTITIES !!!
+            }
+
+
             Debug.Assert(WaveData.EnemyCount >= 0);
             Debug.Assert(WaveData.EnemiesOnScreen >= 0);
             if(WaveData.EnemyCount > 0)
@@ -470,7 +496,7 @@ namespace PTA
                         enemyEntity.Data.MoveDirection = UnityEngine.Random.insideUnitCircle;
                         enemyEntity.Think = ThinkFunctions.HostileThink;
 
-                        enemyEntity.Transform.position = GenerateEntityPosition();
+                        enemyEntity.Transform.position = GenerateEntityPosition(PlayArea);
 
                         enemyEntity.Collider.BoxCollider.enabled = false;
                     }
@@ -540,7 +566,7 @@ namespace PTA
 
                     if(powerupEntity != null)
                     {
-                        powerupEntity.Transform.position = GenerateEntityPosition();
+                        powerupEntity.Transform.position = GenerateEntityPosition(PlayArea);
                     }
 
                     WaveData.RunningPowerupTime = WaveData.PowerupWaitTime;
