@@ -71,7 +71,8 @@ namespace PTA
 
         public Move Move;
         public Think Think;
-        
+
+        public PTAEntity ParentSlot;
         public PTAEntity LTurretSlot;
         public PTAEntity RTurretSlot;
         public PTAEntity DriveSlot;
@@ -86,12 +87,16 @@ namespace PTA
             entity.Transform.localPosition = alignPoint;
 
             entity.Transform.localRotation = Quaternion.identity;
+
+            entity.ParentSlot = newParent;
         }
 
         public static void DetachEntity(PTAEntity entity)
         {
             entity.Transform.parent = null;
             entity.Collider.BoxCollider.enabled = true;
+
+            entity.ParentSlot = null;
         }
 
 

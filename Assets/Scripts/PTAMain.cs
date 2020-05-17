@@ -286,18 +286,11 @@ namespace PTA
 
         public PTACheatCodes Cheats;
 
-        struct PlayAreaDimensions
-        {
-            public float MinX;
-            public float MinY;
-            public float MaxX;
-            public float MaxY;
-            public Vector2 Center;
-        }
-
-        PlayAreaDimensions PlayArea;
+        Rect PlayArea;
         int CurrentScreenWidth;
         int CurrentScreenHeight;
+
+        public PTAWall[] Walls;
 
         PTAUI UI;
         
@@ -306,30 +299,30 @@ namespace PTA
         [EnumNamedArray(typeof(PowerupType))]
         public Sprite[] PowerupSprites = new Sprite[(int)PowerupType.Count];
 
-        static Vector2 GenerateEntityPosition(PlayAreaDimensions playArea)
+        static Vector2 GenerateEntityPosition(Rect playArea)
         {
             Vector2 result = new Vector2();
 
             float safetyNet = 1.0f;
-            result.x = UnityEngine.Random.Range(playArea.MinX + safetyNet, playArea.MaxX - safetyNet);
-            result.y = UnityEngine.Random.Range(playArea.MinY + safetyNet, playArea.MaxY - safetyNet);
+            result.x = UnityEngine.Random.Range(playArea.min.x + safetyNet, playArea.max.x - safetyNet);
+            result.y = UnityEngine.Random.Range(playArea.min.y + safetyNet, playArea.max.y - safetyNet);
 
             return result;
         }
 
-        static PlayAreaDimensions CalculatePlayArea(int screenWidth, int screenHeight)
+        static Rect CalculatePlayArea(int screenWidth, int screenHeight)
         {
-            PlayAreaDimensions result = new PlayAreaDimensions();
-            
+            Rect result;
+
             Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 10));
             Vector2 topRight = Camera.main.ScreenToWorldPoint(new Vector3(screenWidth, screenHeight, 10));
-
             float offscreenOffset = 1.0f;
-            result.MinX = bottomLeft.x - offscreenOffset;
-            result.MinY = bottomLeft.y - offscreenOffset;
-            result.MaxX = topRight.x + offscreenOffset;
-            result.MaxY = topRight.y + offscreenOffset;
-            result.Center = Camera.main.ScreenToWorldPoint(new Vector3(screenWidth / 2, screenHeight / 2, 10));
+            float minX = bottomLeft.x - offscreenOffset;
+            float minY = bottomLeft.y - offscreenOffset;
+            float maxX = topRight.x + offscreenOffset;
+            float maxY = topRight.y + offscreenOffset;
+
+            result = Rect.MinMaxRect(minX, minY, maxX, maxY);
 
             return result;
         }
@@ -344,65 +337,19 @@ namespace PTA
                 Debug.LogError("Layers are missing! Check the layers settings in Edit/Project Settings/Tags and Layers !");
             }
 
-
             CurrentScreenWidth = Screen.width;
             CurrentScreenHeight = Screen.height;
             PlayArea = CalculatePlayArea(CurrentScreenWidth, CurrentScreenHeight);
 
-            Vector2 xWallSize = new Vector2(1.0f, PlayArea.MaxY - PlayArea.MinY);
-            Vector2 yWallSize = new Vector2(PlayArea.MaxX - PlayArea.MinX, 1.0f);
-
-            const int WALL_COUNT = 2;
-            for(WallType i = 0;
-                i < WallType.Count;
-                ++i)
+            Vector2 xWallSize = new Vector2(1.0f, PlayArea.max.y - PlayArea.min.y);
+            Vector2 yWallSize = new Vector2(PlayArea.max.x - PlayArea.min.x, 1.0f);
+            Walls = new PTAWall[4]
             {
-                for(int j = 0;
-                    j < WALL_COUNT;
-                    ++j)
-                {
-                    PTAWall wall = Instantiate(WallPrefab).GetComponent<PTAWall>();
-                    wall.World = this;
-                    wall.BoxCollider = wall.gameObject.GetComponent<BoxCollider2D>();
-                    wall.WallTypeID = i;
-                    if(wall.WallTypeID == WallType.XWall)
-                    {
-                        wall.BoxCollider.size = xWallSize;
-                    }
-                    else if(wall.WallTypeID == WallType.YWall)
-                    {
-                        wall.BoxCollider.size = yWallSize;
-                    }
-
-                    if(j == 0)
-                    {
-                        if(wall.WallTypeID == WallType.XWall)
-                        {
-                            wall.transform.position = new Vector2(PlayArea.MinX, PlayArea.Center.y);
-                        }
-                        else if(wall.WallTypeID == WallType.YWall)
-                        {
-                            wall.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MinY);
-                        }
-                    }
-                    else if(j == 1)
-                    {
-                        if(wall.WallTypeID == WallType.XWall)
-                        {
-                            wall.transform.position = new Vector2(PlayArea.MaxX, PlayArea.Center.y);
-                        }
-                        else if(wall.WallTypeID == WallType.YWall)
-                        {
-                            wall.transform.position = new Vector2(PlayArea.Center.x, PlayArea.MaxY);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError($"Error! Too many walls of type {i} have been spawned!");
-                    }
-                }
-            }
-
+                PTAWall.CreateWall(this, WallPrefab, new Vector2(PlayArea.min.x, PlayArea.center.y), xWallSize, WallType.X),
+                PTAWall.CreateWall(this, WallPrefab, new Vector2(PlayArea.max.x, PlayArea.center.y), xWallSize, WallType.X),
+                PTAWall.CreateWall(this, WallPrefab, new Vector2(PlayArea.center.x, PlayArea.min.y), yWallSize, WallType.Y),
+                PTAWall.CreateWall(this, WallPrefab, new Vector2(PlayArea.center.x, PlayArea.max.y), yWallSize, WallType.Y),
+            };
 
             Entities = new PTAEntity[ENTITY_COUNT];
             for(int i = 0;
@@ -472,9 +419,50 @@ namespace PTA
             {
                 CurrentScreenWidth = screenWidth;
                 CurrentScreenHeight = screenHeight;
+                Rect newPlayArea = CalculatePlayArea(CurrentScreenWidth, CurrentScreenHeight);
 
-                PlayArea = CalculatePlayArea(CurrentScreenWidth, CurrentScreenHeight);
-                // TODO(SpectatorQL): REPOSITION ENTITIES !!!
+                float xFactor = newPlayArea.width / PlayArea.width;
+                float yFactor = newPlayArea.height / PlayArea.height;
+
+                for(int entityIndex = 0;
+                    entityIndex < RunningEntityIndex;
+                    ++entityIndex)
+                {
+                    PTAEntity entity = Entities[entityIndex];
+
+                    if(entity.ParentSlot == null)
+                    {
+                        Vector3 oldP = entity.Transform.position;
+                        Vector3 newP = new Vector3();
+                        newP.x = oldP.x * xFactor;
+                        newP.y = oldP.y * yFactor;
+
+                        entity.Transform.position = newP;
+                    }
+                }
+
+                for(int wallIndex = 0;
+                    wallIndex < Walls.Length;
+                    ++wallIndex)
+                {
+                    PTAWall wall = Walls[wallIndex];
+
+                    Vector3 oldP = wall.transform.position;
+                    Vector3 newP = new Vector3();
+                    newP.x = oldP.x * xFactor;
+                    newP.y = oldP.y * yFactor;
+
+                    wall.transform.position = newP;
+
+                    Vector2 oldSize = wall.BoxCollider.size;
+                    Vector2 newSize = new Vector2();
+                    newSize.x = oldSize.x * xFactor;
+                    newSize.y = oldSize.y * yFactor;
+
+                    wall.BoxCollider.size = newSize;
+                }
+
+                PlayArea = newPlayArea;
             }
 
 

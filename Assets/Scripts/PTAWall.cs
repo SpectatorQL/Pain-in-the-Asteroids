@@ -6,8 +6,8 @@ namespace PTA
 {
     public enum WallType
     {
-        XWall,
-        YWall,
+        X,
+        Y,
 
         Count
     }
@@ -18,6 +18,18 @@ namespace PTA
         public BoxCollider2D BoxCollider;
         
         public WallType WallTypeID;
+
+        public static PTAWall CreateWall(PTAMain world, GameObject wallPrefab, Vector2 position, Vector2 wallSize, WallType wallType)
+        {
+            PTAWall wall = Instantiate(wallPrefab).GetComponent<PTAWall>();
+            wall.World = world;
+            wall.BoxCollider = wall.gameObject.GetComponent<BoxCollider2D>();
+            wall.BoxCollider.size = wallSize;
+            wall.transform.position = position;
+            wall.WallTypeID = wallType;
+
+            return wall;
+        }
 
         void OnCollisionEnter2D(Collision2D collision)
         {
@@ -34,7 +46,7 @@ namespace PTA
                     float safetyNet = 0.25f;
                     Vector2 oldPosition = collision.gameObject.transform.position;
                     Vector2 newPosition = new Vector2();
-                    if(WallTypeID == WallType.XWall)
+                    if(WallTypeID == WallType.X)
                     {
                         if(oldPosition.x > 0)
                         {
@@ -46,7 +58,7 @@ namespace PTA
                         }
                         newPosition.y = oldPosition.y;
                     }
-                    else if(WallTypeID == WallType.YWall)
+                    else if(WallTypeID == WallType.Y)
                     {
                         newPosition.x = oldPosition.x;
                         if(transform.position.y > 0)
