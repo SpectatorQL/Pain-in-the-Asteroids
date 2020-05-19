@@ -128,56 +128,47 @@ namespace PTA
         
         public static void PlayerThink(PTAMain world, PTAEntity entity, float dt)
         {
-            // TODO(SpectatorQL): Android controls will be _very_ different from this.
-            // TODO(SpectatorQL): Move input management out of here.
+            PTAInput input = world.Input;
+
+            // TODO(SpectatorQL): As of right now, the player moves faster than all of the other entities,
+            // because this runs in Update(). Do we want to keep it this way?
+            Vector3 moveVector = new Vector3(input.LX, input.LY);
+            moveVector.Normalize();
+
             float speed = entity.Data.MovementSpeed;
-            Vector2 newPosition = entity.Transform.position;
-            if(Input.GetKey(KeyCode.W))
-            {
-                newPosition.y += speed;
-            }
-            if(Input.GetKey(KeyCode.S))
-            {
-                newPosition.y -= speed;
-            }
-            if(Input.GetKey(KeyCode.A))
-            {
-                newPosition.x -= speed;
-            }
-            if(Input.GetKey(KeyCode.D))
-            {
-                newPosition.x += speed;
-            }
-            
-            bool firing = false;
-            if(Input.GetMouseButton(0))
-            {
-                firing = true;
-            }
-            
-            Vector3 mousePosition = Input.mousePosition;
-            mousePosition.z = 10.0f;
-            Vector3 worldMousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
-            float angle = Mathf.Atan2(worldMousePosition.y - newPosition.y, worldMousePosition.x - newPosition.x);
-            angle = Mathf.Rad2Deg * angle;
-            
-            
+            Vector2 oldPosition = entity.Transform.position;
+            Vector2 newPosition = entity.Transform.position + moveVector * speed;
             entity.Transform.position = newPosition;
+
+            float angle = 0.0f;
+            // TODO(SpectatorQL): Fix auto-snapping to mouse position !!!
+            if((input.RX != 0.0f) || (input.RY != 0.0f))
+            {
+                angle = Mathf.Rad2Deg * Mathf.Atan2(input.RY, input.RX);
+            }
+            else
+            {
+                Vector3 mousePosition = Input.mousePosition;
+                mousePosition.z = 10.0f;
+                Vector3 worldMousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+                angle = Mathf.Rad2Deg * Mathf.Atan2(worldMousePosition.y - newPosition.y, worldMousePosition.x - newPosition.x);
+            }
+            
             Quaternion newRotation = entity.Transform.rotation;
             newRotation.eulerAngles = new Vector3(0.0f, 0.0f, angle);
             entity.Transform.rotation = newRotation;
             
             float runningAttackSpeed = entity.Data.RunningAttackSpeed;
-            if(firing)
+            if(input.Fire)
             {
                 if(runningAttackSpeed <= 0)
                 {
-                    Vector2 fireDirection = worldMousePosition - entity.Transform.position;
+                    Vector2 fireDirection = (newPosition - oldPosition).normalized;
                     PTAEntity newBullet = PTAEntity.CreateFriendlyBullet(world);
                     if(newBullet != null)
                     {
-                        newBullet.Transform.position = entity.Transform.position;
-                        newBullet.Data.MoveDirection = fireDirection.normalized;
+                        newBullet.Transform.position = oldPosition;
+                        newBullet.Data.MoveDirection = fireDirection;
                     }
                     
                     runningAttackSpeed = entity.Data.AttackSpeed;
@@ -194,7 +185,7 @@ namespace PTA
     
     public class PTAFreeEntities
     {
-        PTAEntity[] Entities = new PTAEntity[PTAMain.ENTITY_COUNT];
+        PTAEntity[] Entities = new PTAEntity[PTAMain.MAX_ENTITIES];
         int Top = -1;
         
         public void Add(PTAEntity entity)
@@ -269,9 +260,12 @@ namespace PTA
 
     public class PTAMain : MonoBehaviour
     {
-        public const int ENTITY_COUNT = 4096;
+        public PTAPlatform Platform;
+        public PTAInput Input;
+
+        public const int MAX_ENTITIES = 4096;
         public PTAEntity[] Entities;
-        public int RunningEntityIndex;
+        public int EntityCount;
         // TODO(SpectatorQL): Callers should not be allowed to use this directly due to the fact that it doesn't re-initialize entities!
         public PTAFreeEntities FreeEntities = new PTAFreeEntities();
         public PTAEntity PlayerEntity;
@@ -351,9 +345,9 @@ namespace PTA
                 PTAWall.CreateWall(this, WallPrefab, new Vector2(PlayArea.center.x, PlayArea.max.y), yWallSize, WallType.Y),
             };
 
-            Entities = new PTAEntity[ENTITY_COUNT];
+            Entities = new PTAEntity[MAX_ENTITIES];
             for(int i = 0;
-                i < ENTITY_COUNT;
+                i < MAX_ENTITIES;
                 ++i)
             {
                 Entities[i] = new PTAEntity();
@@ -389,7 +383,7 @@ namespace PTA
         void FixedUpdate()
         {
             for(int i = 0;
-                i < ENTITY_COUNT;
+                i < MAX_ENTITIES;
                 ++i)
             {
                 PTAEntity entity = Entities[i];
@@ -413,6 +407,8 @@ namespace PTA
         {
             float dt = Time.deltaTime;
 
+            Platform.GetInput(Input);
+
             int screenWidth = Screen.width;
             int screenHeight = Screen.height;
             if(screenWidth != CurrentScreenWidth || screenHeight != CurrentScreenHeight)
@@ -425,7 +421,7 @@ namespace PTA
                 float yFactor = newPlayArea.height / PlayArea.height;
 
                 for(int entityIndex = 0;
-                    entityIndex < RunningEntityIndex;
+                    entityIndex < EntityCount;
                     ++entityIndex)
                 {
                     PTAEntity entity = Entities[entityIndex];
@@ -574,7 +570,7 @@ namespace PTA
 
 
             for(int i = 0;
-                i < ENTITY_COUNT;
+                i < MAX_ENTITIES;
                 ++i)
             {
                 PTAEntity entity = Entities[i];

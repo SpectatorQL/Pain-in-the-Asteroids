@@ -327,13 +327,13 @@ namespace PTA
 
         static PTAEntity CreateEntity(PTAMain world)
         {
-            if(world.RunningEntityIndex >= PTAMain.ENTITY_COUNT)
+            if(world.EntityCount >= PTAMain.MAX_ENTITIES)
             {
                 Debug.LogError("PTAEntity limit reached!");
                 return null;
             }
 
-            PTAEntity entity = world.Entities[world.RunningEntityIndex];
+            PTAEntity entity = world.Entities[world.EntityCount];
             GameObject entityObject = GameObject.Instantiate(world.EntityPrefab);
 
             entity.GameObject = entityObject;
@@ -350,8 +350,8 @@ namespace PTA
 
             entity.IsActive = true;
 
-            entity.EntityID = (uint)world.RunningEntityIndex;
-            ++world.RunningEntityIndex;
+            entity.EntityID = (uint)world.EntityCount;
+            ++world.EntityCount;
 
             return entity;
         }

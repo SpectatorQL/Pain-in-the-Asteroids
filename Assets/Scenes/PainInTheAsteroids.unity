@@ -198,7 +198,6 @@ GameObject:
   - component: {fileID: 351888367}
   - component: {fileID: 351888366}
   - component: {fileID: 351888369}
-  - component: {fileID: 351888368}
   m_Layer: 0
   m_Name: Main
   m_TagString: Untagged
@@ -217,8 +216,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abf11f004b1d1e241a166d0dae06ab20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Platform: {fileID: 11400000, guid: 24897049f97698f428b7ebb25d8daf0a, type: 2}
+  Input:
+    LX: 0
+    LY: 0
+    RX: 0
+    RY: 0
+    Fire: 0
   Entities: []
-  RunningEntityIndex: 0
+  EntityCount: 0
+  FreeEntityCount: 0
   PlayerEntity:
     Data:
       MoveDirection: {x: 0, y: 0}
@@ -278,6 +285,7 @@ MonoBehaviour:
     Invincibility: 1
     RapidFire: 1
     RapidFireSpeed: 0.07
+  Walls: []
   Sprites:
   - {fileID: 0}
   - {fileID: 21300000, guid: 1a138e239f3a27a42b4353aea1f8c3a5, type: 3}
@@ -301,25 +309,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &351888368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 351888365}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e188ee899633d0b49870a5ae38b7359d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ratio: {x: 16, y: 9}
-  forceRatioOnAwake: 1
-  listenForWindowChanges: 1
-  createCameraForLetterBoxRendering: 1
-  findCamerasAutomatically: 1
-  letterBoxCameraColor: {r: 0, g: 0, b: 0, a: 1}
-  cameras: []
-  letterBoxCamera: {fileID: 0}
 --- !u!114 &351888369
 MonoBehaviour:
   m_ObjectHideFlags: 0
